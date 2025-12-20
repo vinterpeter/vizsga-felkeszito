@@ -12724,18 +12724,21 @@
             extractTopics() {
                 const topicMap = {};
 
+                // Only use first tag (chapter name) as topic
                 DATA.cards.forEach(card => {
-                    (card.tags || []).forEach(tag => {
-                        if (!topicMap[tag]) topicMap[tag] = { cards: 0, questions: 0 };
-                        topicMap[tag].cards++;
-                    });
+                    const topic = (card.tags || [])[0];
+                    if (topic) {
+                        if (!topicMap[topic]) topicMap[topic] = { cards: 0, questions: 0 };
+                        topicMap[topic].cards++;
+                    }
                 });
 
                 DATA.questions.forEach(q => {
-                    (q.tags || []).forEach(tag => {
-                        if (!topicMap[tag]) topicMap[tag] = { cards: 0, questions: 0 };
-                        topicMap[tag].questions++;
-                    });
+                    const topic = (q.tags || [])[0];
+                    if (topic) {
+                        if (!topicMap[topic]) topicMap[topic] = { cards: 0, questions: 0 };
+                        topicMap[topic].questions++;
+                    }
                 });
 
                 return topicMap;
@@ -12810,8 +12813,9 @@
                 const topics = Array.from(this.selectedTopics);
 
                 if (this.selectedMode === 'flashcard') {
+                    // Filter by first tag (chapter name)
                     const filteredCards = DATA.cards.filter(c =>
-                        (c.tags || []).some(t => topics.includes(t))
+                        topics.includes((c.tags || [])[0])
                     );
 
                     this.flashcardQueue = filteredCards.map(c => ({
@@ -12826,8 +12830,9 @@
                         return a.nextReview - b.nextReview;
                     });
                 } else {
+                    // Filter by first tag (chapter name)
                     const filteredQuestions = DATA.questions.filter(q =>
-                        (q.tags || []).some(t => topics.includes(t))
+                        topics.includes((q.tags || [])[0])
                     );
 
                     this.quizQueue = filteredQuestions.map(q => ({
