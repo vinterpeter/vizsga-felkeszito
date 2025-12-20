@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tanulókártyák - Spaced Repetition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .deck-info {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00d9ff;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .stat-item.new .stat-value { color: #00d9ff; }
+        .stat-item.learning .stat-value { color: #ffa500; }
+        .stat-item.review .stat-value { color: #00ff88; }
+        .stat-item.mastered .stat-value { color: #9b59b6; }
+
+        /* Card Container */
+        .card-container {
+            perspective: 1000px;
+            margin-bottom: 30px;
+        }
+
+        .flashcard {
+            width: 100%;
+            height: 300px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .card-front {
+            background: linear-gradient(145deg, #2a2a4a, #1e1e3a);
+            border: 2px solid rgba(0, 217, 255, 0.3);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3),
+                        inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+
+        .card-back {
+            background: linear-gradient(145deg, #1e3a2a, #1a2e1e);
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            transform: rotateY(180deg);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3),
+                        inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+
+        .card-content {
+            font-size: 1.4rem;
+            line-height: 1.6;
+        }
+
+        .card-image {
+            max-width: 100%;
+            max-height: 150px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            object-fit: contain;
+        }
+
+        .card-hint {
+            position: absolute;
+            bottom: 20px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .card-tags {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .tag {
+            background: rgba(255,255,255,0.1);
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            color: #888;
+        }
+
+        .card-number {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        /* Rating Buttons */
+        .rating-buttons {
+            display: none;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .rating-buttons.visible {
+            display: flex;
+        }
+
+        .rating-btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #fff;
+        }
+
+        .rating-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .rating-btn.again {
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+        }
+
+        .rating-btn.hard {
+            background: linear-gradient(145deg, #e67e22, #d35400);
+        }
+
+        .rating-btn.good {
+            background: linear-gradient(145deg, #27ae60, #1e8449);
+        }
+
+        .rating-btn.easy {
+            background: linear-gradient(145deg, #3498db, #2980b9);
+        }
+
+        .rating-btn .next-review {
+            display: block;
+            font-size: 0.7rem;
+            opacity: 0.8;
+            margin-top: 3px;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            height: 8px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        /* Control Buttons */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .control-btn {
+            padding: 12px 30px;
+            border: 2px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.4);
+        }
+
+        .control-btn.primary {
+            background: linear-gradient(145deg, #00d9ff, #0099cc);
+            border: none;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-state h2 {
+            color: #00ff88;
+            margin-bottom: 15px;
+        }
+
+        .empty-state p {
+            color: #888;
+            margin-bottom: 30px;
+        }
+
+        /* Session Complete */
+        .session-complete {
+            text-align: center;
+            padding: 40px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+        }
+
+        .session-complete h2 {
+            color: #00ff88;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .session-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 30px 0;
+        }
+
+        .session-stat {
+            text-align: center;
+        }
+
+        .session-stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        .session-stat-label {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        /* Settings Panel */
+        .settings-panel {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .settings-panel h3 {
+            margin-bottom: 15px;
+            color: #00d9ff;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            color: #ccc;
+        }
+
+        .setting-value {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .setting-input {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            width: 80px;
+            text-align: center;
+        }
+
+        /* Keyboard Shortcuts */
+        .shortcuts {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 15px;
+        }
+
+        .shortcuts h4 {
+            color: #888;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .shortcut-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .shortcut {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+        }
+
+        .key {
+            background: rgba(255,255,255,0.1);
+            padding: 4px 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            color: #00d9ff;
+        }
+
+        /* Streak indicator */
+        .streak-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            color: #ffa500;
+        }
+
+        .streak-fire {
+            font-size: 1.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .stats-bar {
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .stat-item {
+                flex: 1 1 40%;
+            }
+
+            .rating-buttons {
+                flex-wrap: wrap;
+            }
+
+            .rating-btn {
+                flex: 1 1 45%;
+            }
+
+            .flashcard {
+                height: 250px;
+            }
+
+            .card-content {
+                font-size: 1.1rem;
+            }
+        }
+
+        /* Loading animation */
+        .loading {
+            text-align: center;
+            padding: 60px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top-color: #00d9ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* File input styling */
+        .file-input-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(145deg, #00d9ff, #0099cc);
+            color: #fff;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 217, 255, 0.3);
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .load-custom {
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Tanulókártyák</h1>
+            <p class="deck-info" id="deckInfo">Spaced Repetition System</p>
+        </header>
+
+        <div id="app">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Kártyák betöltése...</p>
+            </div>
+        </div>
+
+        <div class="load-custom">
+            <input type="file" id="fileInput" accept=".json" style="display:none">
+            <button class="control-btn" onclick="document.getElementById('fileInput').click()">
+                Saját JSON betöltése
+            </button>
+        </div>
+
+        <div class="shortcuts">
+            <h4>Billentyűparancsok</h4>
+            <div class="shortcut-list">
+                <div class="shortcut"><span class="key">Space</span> Kártya megfordítása</div>
+                <div class="shortcut"><span class="key">1</span> Újra</div>
+                <div class="shortcut"><span class="key">2</span> Nehéz</div>
+                <div class="shortcut"><span class="key">3</span> Jó</div>
+                <div class="shortcut"><span class="key">4</span> Könnyű</div>
+                <div class="shortcut"><span class="key">R</span> Visszaállítás</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Default embedded cards - Harci kiszolgáló támogatás vizsgafelkészítő
+        const DEFAULT_DATA = {
+            "deck": {
+                "name": "Harci kiszolgáló támogatás - Vizsgafelkészítő",
+                "description": "A Magyar Honvédség harci kiszolgáló támogatás tananyaga: logisztika alapelvei, készletlépcsőzés, hadtáp és haditechnikai támogatás, egészségügyi biztosítás, Role szintek, TCCC, MEDEVAC"
+            },
+            "cards": [
+                {"id": 1, "front": "Mik a logisztikai támogatás alapelvei?", "back": "1. A műveletek elsődlegessége\n2. Az egyszerűség\n3. A rugalmasság\n4. A gazdaságosság\n5. A rendelkezésre állás (elérhetőség és elégségesség)\n6. A fenntarthatóság\n7. A túlélőképesség\n8. A felelősség", "tags": ["logisztika", "alapelvek"]},
+                {"id": 2, "front": "Mi a DOS (Day of Supply)?", "back": "Átlagos napi felhasználás (Day of Supply) - a készletek mértékegysége, amely megmutatja, hogy az adott készlet hány napi átlagos felhasználást fedez.", "tags": ["logisztika", "DOS"]},
+                {"id": 3, "front": "Mennyi DOS-t tartalmaz a zászlóalj készlet?", "back": "A zászlóalj készletek 5 átlagos napi felhasználást (5 DOS) fedeznek. A készleteket a századoknál, ütegeknél, harcjárművekben, harcoló állománynál és a zászlóalj ellátó szervezeteinél alakítják meg.", "tags": ["logisztika", "készlet"]},
+                {"id": 4, "front": "Mennyi DOS-t tartalmaz a dandár készlet?", "back": "A dandár (ezred) készletek a katonai műveletek során a szervezetszerű alegységek 2 átlagos napi felhasználásnak (2 DOS) megfelelő hadfelszerelést tartalmaznak.", "tags": ["logisztika", "készlet"]},
+                {"id": 5, "front": "Mi a különbség a Push és Pull ellátás között?", "back": "Push (Tőlem): az elöljáró kiszállítja a készleteket az alárendeltekhez.\nPull (Hozzám): az alárendelt vételezi a készleteket az elöljárótól.\nA kettő kombinálása is alkalmazható.", "tags": ["logisztika", "ellátás"]},
+                {"id": 6, "front": "Mik a logisztika funkcionális területei?", "back": "1. Ellátás, tárolás\n2. Üzemben tartás (üzemfenntartás, helyreállítás)\n3. Mozgatás-szállítás", "tags": ["logisztika", "funkciók"]},
+                {"id": 7, "front": "Mik a logisztika ágazati területei?", "back": "1. Hadtáp támogatás\n2. Haditechnikai támogatás\n3. Közlekedési támogatás\n4. Katonai elhelyezési és infrastrukturális támogatás", "tags": ["logisztika", "ágazatok"]},
+                {"id": 8, "front": "Mik a hadtáp támogatás szakágai?", "back": "1. Élelmezési biztosítás\n2. Üzemanyag biztosítás\n3. Ruházati biztosítás\n4. Humánanyag biztosítás\n5. Térképészeti anyagbiztosítás", "tags": ["logisztika", "hadtáp"]},
+                {"id": 9, "front": "Mik a haditechnikai támogatás szakágai?", "back": "1. Páncélos- és gépjármű-technikai biztosítás\n2. Fegyverzettechnikai biztosítás\n3. Elektronikai biztosítás\n4. Műszaki technikai biztosítás\n5. Vegyivédelmi technikai biztosítás\n6. Repülő-műszaki biztosítás\n7. Mérésügyi biztosítás", "tags": ["logisztika", "haditechnika"]},
+                {"id": 10, "front": "Mi a helyreállítás?", "back": "Az üzemképtelen, meghatározott üzemeltetési normáját elért haditechnikai eszközök üzemképességének visszaállítása. Főbb elemei: technikai felderítés, vontatás, szállítás a javítás helyszínére, javítás, üzemeltetőhöz visszajuttatás vagy újraelosztás.", "tags": ["logisztika", "haditechnika"]},
+                {"id": 11, "front": "Mi a TZR (Technikai Zárórészleg)?", "back": "A menetoszlop végén haladó technikai biztosító elem. Felkészül technikai, egészségügyi és helyszíni forgalomszabályozási feladatok végzésére. Ha a javítás helyszínen max 15-20 perc alatt nem végezhető, a meghibásodott járművet a következő pihenőig vontatják.", "tags": ["logisztika", "menet"]},
+                {"id": 12, "front": "Mik a tábori elhelyezés övezetei?", "back": "1. Parancsnoki és szolgálati övezet\n2. Kiképzési övezet, sport- és szabadidős övezet\n3. Technikai övezet\n4. Raktárövezet\n5. Elhelyezési övezet\n6. Övezetbe nem sorolható létesítmények (védelmi, óvóhely)", "tags": ["logisztika", "tábor"]},
+                {"id": 13, "front": "Mik a táborhely szemrevételezésének területei?", "back": "a) Hadműveleti: őrzés-védelem\nb) Műszaki: erődítés, álcázás\nc) Elhelyezési: infrastruktúra, víz\nd) Közegészségügyi\ne) Logisztikai: raktározás, közlekedés\nf) Híradó: hálózat kiépítés\ng) Vegyvédelmi: ABV, tűzvédelem\nh) Térképészeti", "tags": ["logisztika", "tábor"]},
+                {"id": 14, "front": "Mi a logisztikai csoportosítás?", "back": "A szakalegységekből létrehozott ideiglenes, a végrehajtás fázisaihoz igazodó logisztikai harcrendi elemek megalakítása és egységes rendszerben történő működése. Lehet stacioner vagy mobil.", "tags": ["logisztika", "csoportosítás"]},
+                {"id": 15, "front": "Mi a harcparancs logisztikai mellékletének (R melléklet) tartalma?", "back": "- Logisztikai támogatás feladatai és prioritásai\n- Ellátási prioritások fázisok szerint\n- Kijelölt logisztikai erőforrások\n- Nemzetgazdasági erőforrások\n- Fogyasztási normák\n- Készletképzés és ellátás rendje\n- Helyreállítás rendje\n- CIMIC feladatok", "tags": ["logisztika", "tervezés"]},
+                {"id": 16, "front": "Mi a LUR (Logisztikai Utaltsági Rend)?", "back": "A HVK által évente összeállított és a HM KÁT által kiadott dokumentum, amely meghatározza a logisztikai gazdasági szervvel nem rendelkező honvédelmi szervezetek intézményi logisztikai ellátását végző kijelölt honvédségi szervezetet.", "tags": ["logisztika", "gazdálkodás"]},
+                {"id": 17, "front": "Mi az egészségügyi biztosítás definíciója?", "back": "A haderő személyi állománya egészségének megóvása, helyreállítása érdekében végzett tervszerű, folyamatos tevékenység. Célja a feladatot végrehajtó csapatok egészségének, erejének és mentális állapotának megőrzése, illetve helyreállítása.", "tags": ["egészségügy", "alapfogalom"]},
+                {"id": 18, "front": "Mik az egészségügyi biztosítás főbb területei?", "back": "1. Megelőzés (prevenció)\n2. Egészségügyi kiürítés\n3. Gyógyítás\n4. Anyagi-technikai biztosítás (logisztikai)\n5. Kiképzés\n6. Kutatás és fejlesztés", "tags": ["egészségügy", "területek"]},
+                {"id": 19, "front": "Mi a 10-1-2+2 szabály?", "back": "Egészségügyi időfaktorok:\n- 10 perc: elsősegély (vérzéscsillapítás, légútbiztosítás)\n- 1 óra: prehospitális sürgősségi ellátás (DCR)\n- 2 óra: sebészeti beavatkozás (DCS)\n- +2 óra: további sebészeti, diagnosztikai ellátás stratégiai kiürítéshez", "tags": ["egészségügy", "időfaktor"]},
+                {"id": 20, "front": "Mi az IFAK?", "back": "Improved First Aid Kit - személyi elsősegély felszerelés. Minden katona rendelkezik vele, és képes kell legyen a saját vagy társa ellátását megkezdeni a sérülés helyszínén.", "tags": ["egészségügy", "felszerelés"]},
+                {"id": 21, "front": "Ki a HÉK (Harctéri Életmentő Katona)?", "back": "Combat Life Saver (CLS) - polgári egészségügyi szakképzettséggel nem rendelkező katona, aki tanfolyamon sajátítja el a TCCC alapjait. Képes perifériás vénabiztosításra, infúzió adásra, mellkasfél tűdetenzionálására.", "tags": ["egészségügy", "szintek"]},
+                {"id": 22, "front": "Mik az egészségügyi biztosítási szintek?", "back": "1. Ön- és kölcsönös segély (IFAK)\n2. HÉK - Harctéri életmentő katona (CLS készlet)\n3. Első szaksegély - felcser (EEK II)\n4. Emelt szintű szaksegély - mentőtiszt (EEK I)\n5. Első orvosi segély - orvos (EEK I)\n6. HMK/MES - különleges műveleti medic-ek", "tags": ["egészségügy", "szintek"]},
+                {"id": 23, "front": "Mi a Role 1?", "back": "Zászlóalj/ezred kötelékében elhelyezkedő egészségügyi központ, szakasznyi erő. A prehospitális ellátás része. Feladatai: napi betegellátás, sürgősségi ellátás, sérült stabilizálása, TRIAGE, kiürítés. Sátras kialakítású, a harcérintkezéstől 3-5 km-re települ.", "tags": ["egészségügy", "Role"]},
+                {"id": 24, "front": "Mi a Role 2?", "back": "Dandár egészségügyi szervezete, század szintű erő. Megjelenik a sebészeti ellátás (DCS). Képességei: DCR, DCS, postoperatív ellátás, intenzív részleg, diagnosztika (röntgen, UH), labor, vérkészlet. Sátrak és konténerek kombinációja.", "tags": ["egészségügy", "Role"]},
+                {"id": 25, "front": "Mi a különbség a Role 2 Basic és Enhanced között?", "back": "Role 2 Basic (R2B): alap sebészeti és intenzív képességek.\nRole 2 Enhanced (R2E): kibővített képességek és kapacitások, többre képes mint a Basic szint.", "tags": ["egészségügy", "Role"]},
+                {"id": 26, "front": "Mi a Role 3?", "back": "Általában stacioner egészségügyi létesítmény. A Role 2 képességein felül további szakterületeket tartalmaz: CT, idegsebészet, fogászat. Áttelepítése nem vagy csak nehezen megvalósítható. Hazai viszonylatban: nagyobb városi vagy megyei kórház.", "tags": ["egészségügy", "Role"]},
+                {"id": 27, "front": "Mi a Role 4?", "back": "Az adott nemzet saját működtetésű teljesen stacioner kórháza, mely mind a definitív ellátás széles spektrumára, mind a rehabilitációra képes. MH szempontjából pl.: Észak-Pesti Centrumkórház - Honvédkórház.", "tags": ["egészségügy", "Role"]},
+                {"id": 28, "front": "Mi a TCCC (Tactical Combat Casualty Care)?", "back": "Taktikai harctéri sérültellátás - a sérült ellátását a taktikai helyzethez adaptáljuk. Fázisai:\n1. Tűz/fenyegetettség alatti ellátás\n2. Taktikai harctéri ellátás\n3. Taktikai kiürítés alatti ellátás", "tags": ["egészségügy", "TCCC"]},
+                {"id": 29, "front": "Mi a különbség a MEDEVAC és CASEVAC között?", "back": "MEDEVAC: egészségügyi kiürítés - erre kijelölt egészségügyi szakállomány, erre kialakított eszközzel, folyamatos egészségügyi ellátással.\nCASEVAC: nem felügyelt szállítás - nem egészségügyi eszközzel, nem feltétlenül megfelelő ellátással. Akkor alkalmazzák, ha MEDEVAC nem áll rendelkezésre.", "tags": ["egészségügy", "kiürítés"]},
+                {"id": 30, "front": "Mik a MEDEVAC típusai?", "back": "1. Előretolt MEDEVAC: sérülés helyszínéről az első ellátóhelyig (földi, helikopter)\n2. Taktikai MEDEVAC: hadszíntéren belüli szállítás MTF-ek között\n3. STRATEVAC: hadszínterek közötti/hazai kiürítés (repülő, vonat, hajó)", "tags": ["egészségügy", "kiürítés"]},
+                {"id": 31, "front": "Mi a PECC?", "back": "Patient Evacuation Coordination Cell/Centre - Beteg Kiürítést Koordináló Központ. Célja: minden sérült az állapotának megfelelő legjobb ellátást kapja, optimális szállítókapacitás és MTF kihasználás mellett.", "tags": ["egészségügy", "PECC"]},
+                {"id": 32, "front": "Mik a PECC feladatai?", "back": "1. Betegszállítás koordinálása\n2. Betegek nyomon követése\n3. Kiürítési folyamatok koordinálása\n4. Egészségügyi jelentések összegzése\n5. Harcérték és készletek nyilvántartása\n6. MTF-ek ágyszámának és felszereltségének figyelése", "tags": ["egészségügy", "PECC"]},
+                {"id": 33, "front": "Mit jelent a Priority 1 / URGENS sérültkategória?", "back": "A sérült azonnali szállítást igényel élet-, végtag- és funkciómentő beavatkozásra. Célja súlyos komplikáció, maradandó fogyatékosság megakadályozása. Ajánlott kiürítési idő: minél előbb, de max 12 óra.", "tags": ["egészségügy", "prioritás"]},
+                {"id": 34, "front": "Mit jelent a Priority 2 / ELSŐBBSÉGI sérültkategória?", "back": "A sérült sürgős szállítása szükséges, de sérülései nem életveszélyesek. Speciális kezelésre van szüksége, ami az adott helyen nem elérhető. Cél: fájdalom csökkentése, maradandó károsodás elkerülése. Ajánlott kiürítési idő: <24 óra.", "tags": ["egészségügy", "prioritás"]},
+                {"id": 35, "front": "Mit jelent a Priority 3 / RUTIN sérültkategória?", "back": "A sérült további ellátást igényel, de ez halaszthatóbb mint P1 és P2 esetén. Ide tartozik a rutin betegek szállítása és a honi hazaszállítás. Javasolt idő: maximum 72 óra.", "tags": ["egészségügy", "prioritás"]},
+                {"id": 36, "front": "Mi a TRIAGE?", "back": "Betegosztályozás - a betegek/sérültek ellátási és kiürítési prioritásának meghatározása a rendelkezésre álló erőforrások és a sérültek állapota alapján.", "tags": ["egészségügy", "rövidítés"]},
+                {"id": 37, "front": "Mi a MASCAL?", "back": "Mass Casualty - tömeges sérültáramlás. Olyan helyzet, amikor a sérültek száma meghaladja az elérhető egészségügyi kapacitásokat.", "tags": ["egészségügy", "rövidítés"]},
+                {"id": 38, "front": "Mit jelent a METHANE jelentés?", "back": "M - Military details (katonai adatok)\nE - Exact location (pontos helyszín)\nT - Time and type of incident (idő és típus)\nH - Hazards in the area (veszélyek)\nA - Approach routes (megközelítési útvonalak)\nN - Number of casualties (sérültek száma)\nE - Expected response (elvárt válasz)", "tags": ["egészségügy", "jelentés"]},
+                {"id": 39, "front": "Mi a MEDAD?", "back": "Medical Adviser - egészségügyi tanácsadó. A parancsnok tanácsadója egészségügyi vonatkozású döntésekben. A dandár törzsébe tervezett egészségügyi főtiszt.", "tags": ["egészségügy", "szervezet"]},
+                {"id": 40, "front": "Mi az FST (Forward Surgical Team)?", "back": "Előretolt sebészcsoport - olyan megoldás, ami nem követi a Role szinteket. A sebészeti képességet előretolt pozícióban biztosítja, akár Role 1 kiegészítéseként.", "tags": ["egészségügy", "szervezet"]},
+                {"id": 41, "front": "Mit jelent a DCR és DCS?", "back": "DCR - Damage Control Resuscitation: prehospitális (kórház előtti) sürgősségi ellátás, 1 órán belül.\nDCS - Damage Control Surgery: élet-, végtag- és funkciómentő sebészeti beavatkozás, 2 órán belül.", "tags": ["egészségügy", "ellátás"]},
+                {"id": 42, "front": "Mit jelent az LLE rövidítés?", "back": "Life, Limb, Eyesight - az egészségügyi ellátás prioritásai: élet, végtag, látás. Ebben a sorrendben kell a beavatkozásokat priorizálni.", "tags": ["egészségügy", "rövidítés"]},
+                {"id": 43, "front": "Mik a betegekre vonatkozó rövidítések?", "back": "D - Disease (betegség)\nDNBI - Disease and Non-Battle Injuries (betegség és nem harci sérülés)\nBS - Battle Stress (harci stressz)\nKIA - Killed in Action (harcban elesett)\nWIA - Wounded in Action (harcban sebesült)\nMIA - Missing in Action (eltűnt)", "tags": ["egészségügy", "rövidítés"]},
+                {"id": 44, "front": "Mi a 9-liner jelentés?", "back": "A MEDEVAC igény helyszínről történő jelzésére használt szabványos jelentésformátum, amely 9 pontban tartalmazza a kiürítéshez szükséges információkat.", "tags": ["egészségügy", "jelentés"]},
+                {"id": 45, "front": "Mi a PMR (Patient Movement Request)?", "back": "A STRATEVAC (stratégiai kiürítés) igényeknél használt jelentés. Összeállítását az egészségügyi személyzet végzi.", "tags": ["egészségügy", "jelentés"]},
+                {"id": 46, "front": "Mi a CSU (Casualty Staging Unit)?", "back": "A stratégiai kiürítés során egy köztes, átmeneti ellátópont, ahol a sérültek felkészítése történik a további szállításra.", "tags": ["egészségügy", "szervezet"]},
+                {"id": 47, "front": "Mi az MRoE (Medical Rules of Eligibility)?", "back": "A különböző 'jogállású' sérültek/betegek ellátásának kötelezettsége és szintje. Pl.: saját katonai erő, hadifogoly (PoW), civil - eltérő ellátási kötelezettségekkel.", "tags": ["egészségügy", "szabály"]},
+                {"id": 48, "front": "Mi az egészségügyi felderítés?", "back": "Orvosi, biológiai-tudományos, járványügyi és környezeti információk gyűjtése, kiértékelése, elemzése. Része a katonai és civil egészségügyi képességek felmérése a megelőző egészségügyi biztosítási feladatok tervezéséhez.", "tags": ["egészségügy", "felderítés"]},
+                {"id": 49, "front": "Milyen páncélozott sebesültszállítók vannak az MH-ban?", "back": "BTR-SKJ és LYNX AMB. Szerencsés, ha a sebesültszállító a csapatszállítóval azonos platformon szerelt, így együtt tudnak mozogni a harcoló alegységekkel.", "tags": ["egészségügy", "eszköz"]},
+                {"id": 50, "front": "Hol működik a PECC dandár szinten?", "back": "A dandár harcvezetési ponton (TOC). Koordinálja a Role 1 → Role 2 és a Role 2 → magasabb szintű MTF közötti kiürítést.", "tags": ["egészségügy", "szervezet"]},
+                {"id": 51, "front": "Mi az üzemben tartás célja?", "back": "A haditechnikai eszközökre irányuló üzemfenntartási tevékenységek együttese a katonai szervezetek előírt technikai hadrafoghatóságának fenntartása érdekében. Magában foglalja: technikai kiszolgálást, javítást, harci alkalmazásra való felkészítést.", "tags": ["logisztika", "haditechnika"]},
+                {"id": 52, "front": "Mik a mozgatás-szállítás tervezésének alapadatai?", "back": "- Végrehajtandó feladat és parancsnoki szándék\n- Távolság és időkeret\n- FOSZAB erők meghatározása\n- Szemben álló fél képességei\n- Úthálózat adatai\n- Terep és időjárás hatásai\n- Polgári közlekedés hatásai", "tags": ["logisztika", "közlekedés"]},
+                {"id": 53, "front": "Mi a különbség a főellátási és ellátási utak között?", "back": "Főellátási utak: a stratégiai és hadműveleti szintű készletek decentralizálására szolgálnak.\nEllátási utak: a harcászati szinten biztosítják a csapatok mozgathatóságát és az anyagszállítást. Mindkettő a csapatok térnyeréséhez igazodva változhat.", "tags": ["logisztika", "közlekedés"]},
+                {"id": 54, "front": "Mik a logisztikai gazdálkodás módszerei?", "back": "1. Értékelemzés - döntés-előkészítő módszer\n2. Költségelemzés - erőforrások költségének becslése\n3. Kockázatelemzés - politikai, gazdasági, humán kockázatok\n4. Strukturált döntésanalízis - célok és konfliktusok azonosítása", "tags": ["logisztika", "gazdálkodás"]},
+                {"id": 55, "front": "Mi a sérült technikai gyűjtőhely?", "back": "A csapatok mélységében, az ellenség tűzhatásán kívül telepített hely, ahol a meghibásodott/sérült haditechnikai eszközök javítása történik, vagy átadásra kerülnek az elöljáró tagozatnak.", "tags": ["logisztika", "haditechnika"]},
+                {"id": 56, "front": "Mi a logisztikai első lépcső feladata támadásban?", "back": "A kritikus utánpótlási anyagokat (lőszer, üzemanyag, műszaki harcanyag) közelebb viszi a harcoló alegységekhez. Tartalmazza: közvetlen utánpótló járművek, javító-vontató csoportok, egészségügyi erők. Az első lépcsőben támadó alegységeket követi.", "tags": ["logisztika", "támadás"]},
+                {"id": 57, "front": "Mi a logisztikai második lépcső feladata?", "back": "A logisztikai alegységek első lépcsőbe be nem vont vezetési, ellátó, javító, szállító elemei. A harcterület hátsó harmadában, a mögöttes harcálláspont közelében települ.", "tags": ["logisztika", "támadás"]},
+                {"id": 58, "front": "Mik a tábori elhelyezés kiválasztásának szempontjai?", "back": "- Kemény, száraz talaj\n- Folyóvíz közelében, árterületen kívül\n- Gyáraktól, településektől távol\n- Egészséges vízforrás\n- Vasútállomás, jó út közelében\n- Elegendő hely, tűzvédelmi megfelelés\n- Lőszer, robbanóanyag elkülönített tárolása", "tags": ["logisztika", "tábor"]},
+                {"id": 59, "front": "Mit tartalmaz a tábori telephely?", "back": "A technikai övezet szerves eleme, a technikai eszközök tárolására, kiszolgálására, javítására kijelölt és berendezett terület. Biztosítja: biztonságos tárolást, menet- és harckész állapotba helyezést, technikai kiszolgálásokat, tűz- és munkavédelmi feltételeket.", "tags": ["logisztika", "tábor"]},
+                {"id": 60, "front": "Mi a Role 1 személyi állománya és elhelyezkedése?", "back": "Szakasznyi erő, zászlóalj/ezred kötelékében. Hagyományosan a harcérintkezéstől 3-5 km-re települ, de műveleti megfontolások ezt felülírhatják. Könnyen, gyorsan mobilizálható, sátras kialakítású.", "tags": ["egészségügy", "Role"]},
+                {"id": 61, "front": "Mik a Role 2 elemei az MH-ban?", "back": "Konténerek: Intenzív, Műtő, Shocktalanító, Röntgen, Labor, Halott tároló, Raktár, Aggregátor, Vízkezelő\nSátrak: Műtő előkészítő, Betegőrző, Eligazító, TRIAGE, Összekötő, Magasnyomású fektető, Bejárati modul", "tags": ["egészségügy", "Role"]},
+                {"id": 62, "front": "Mi az EEK I és EEK II?", "back": "EEK I - Első Ellátó Készlet I.: mentőtiszt és orvos felszerelése, emelt szintű prehospitális ellátáshoz.\nEEK II - Első Ellátó Készlet II.: felcser felszerelése, első szaksegély nyújtásához.", "tags": ["egészségügy", "felszerelés"]},
+                {"id": 63, "front": "Mi a TCCC első fázisa?", "back": "Tűz/fenyegetettség alatti ellátás (Care under fire/threat): minimális beavatkozás, fedezékbe juttatás, életmentő beavatkozások (vérzéscsillapítás) a taktikai helyzet figyelembevételével.", "tags": ["egészségügy", "TCCC"]},
+                {"id": 64, "front": "Mi a védelmi harc logisztikai támogatásának célja?", "back": "Műszaki erődítési anyagok kiszállítása, hadianyag készletek felhalmozása és lépcsőzése, haditechnikai eszközök felkészítése harci körülményekre, sérült eszközök helyreállítása, csapatmozgások és szállítások koordinálása.", "tags": ["logisztika", "védelem"]},
+                {"id": 65, "front": "Mi a támadó harc logisztikai támogatásának sajátossága?", "back": "A logisztikai hadrendi elemek a támadás üteméhez igazodva, rövid településsel hajtják végre feladataikat. A készleteket mobilizáltan, felmálházva tárolják. Az ellátási távolságok a térnyeréssel növekedhetnek.", "tags": ["logisztika", "támadás"]},
+                {"id": 66, "front": "Mi a HMK és MES képzés?", "back": "HMK - Harctéri Mentőkatona: különleges műveleti feladatok egészségügyi biztosítására, más szervezeteknek is nyitott.\nMES - Műveleti Egészségügyi Specialista: kifejezetten különleges műveleti feladatok biztosítására.", "tags": ["egészségügy", "kiképzés"]},
+                {"id": 67, "front": "Hol jelennek meg az ellátó utak a tervezési okmányokban?", "back": "A logisztikai támogatás végrehajtási tervének munkatérképén. Meg kell jeleníteni: ellátási utakat, be-kirakóállomásokat, harcrendi elemeket, vezetési pontokat, logisztikai szervezet települési körleteit, BNT elemeket.", "tags": ["logisztika", "tervezés"]},
+                {"id": 68, "front": "Mit jelent a kiegészítő készlet?", "back": "Tömeges anyagfelhasználás esetén a csapatkészlet mellett a legfontosabb anyagféleségekből (pl. üzemanyag, tüzérlőszer) létrehozott extra készlet. A felhasználókhoz közelítve, mobilizáltan vagy töltőpontokon stacionálisan alakítják ki.", "tags": ["logisztika", "készlet"]},
+                {"id": 69, "front": "Mi a javító-vontató csoport feladata?", "back": "A megsérült és meghibásodott haditechnikai eszközök tűz alól való kivontatása és helyreállítása. Elsődlegesen a mozgásképtelenné vált eszközök felderítése, vontatása vagy helyszíni javítása, majd visszatérítése a harcrendbe.", "tags": ["logisztika", "haditechnika"]},
+                {"id": 70, "front": "Mit jelent a tagozatos javító-vontató rendszer?", "back": "A védelmi/támadó harc során megsérült haditechnikai eszközök helyreállítására kiépített, egymásra épülő rendszer. Az alegységektől a hadműveleti szintig terjed, minden szint a saját kompetenciájának megfelelő javításokat végzi.", "tags": ["logisztika", "haditechnika"]}
+            ]
+        };
+
+        // SM-2 Algorithm Implementation
+        class SM2 {
+            static defaultCard() {
+                return {
+                    easeFactor: 2.5,
+                    interval: 0,
+                    repetitions: 0,
+                    nextReview: Date.now(),
+                    lastReview: null
+                };
+            }
+
+            static calculate(card, quality) {
+                // quality: 0-5 (0-1: again, 2: hard, 3: good, 4-5: easy)
+                let { easeFactor, interval, repetitions } = card;
+
+                if (quality < 3) {
+                    // Failed - reset
+                    repetitions = 0;
+                    interval = 1;
+                } else {
+                    // Passed
+                    if (repetitions === 0) {
+                        interval = 1;
+                    } else if (repetitions === 1) {
+                        interval = 6;
+                    } else {
+                        interval = Math.round(interval * easeFactor);
+                    }
+                    repetitions++;
+                }
+
+                // Update ease factor
+                easeFactor = Math.max(1.3, easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)));
+
+                const nextReview = Date.now() + interval * 24 * 60 * 60 * 1000;
+
+                return {
+                    easeFactor,
+                    interval,
+                    repetitions,
+                    nextReview,
+                    lastReview: Date.now()
+                };
+            }
+
+            static getNextReviewText(interval) {
+                if (interval === 0) return 'Most';
+                if (interval === 1) return '1 nap';
+                if (interval < 7) return `${interval} nap`;
+                if (interval < 30) return `${Math.round(interval / 7)} hét`;
+                if (interval < 365) return `${Math.round(interval / 30)} hónap`;
+                return `${Math.round(interval / 365)} év`;
+            }
+        }
+
+        // Main App
+        class FlashcardApp {
+            constructor() {
+                this.cards = [];
+                this.currentIndex = 0;
+                this.isFlipped = false;
+                this.sessionStats = { reviewed: 0, again: 0, hard: 0, good: 0, easy: 0 };
+                this.studyQueue = [];
+                this.storageKey = 'flashcards_progress';
+
+                this.init();
+            }
+
+            async init() {
+                await this.loadCards();
+                this.loadProgress();
+                this.buildStudyQueue();
+                this.render();
+                this.bindEvents();
+            }
+
+            async loadCards() {
+                let data = null;
+
+                // Try to load from external flashcards.json first
+                try {
+                    const response = await fetch('flashcards.json');
+                    if (response.ok) {
+                        data = await response.json();
+                        console.log('Loaded from flashcards.json');
+                    }
+                } catch (error) {
+                    console.log('External JSON not available, using embedded data');
+                }
+
+                // Fall back to embedded data
+                if (!data) {
+                    data = DEFAULT_DATA;
+                }
+
+                this.deckInfo = data.deck;
+                this.cards = data.cards.map(card => ({
+                    ...card,
+                    ...SM2.defaultCard(),
+                    ...(this.getCardProgress(card.id) || {})
+                }));
+
+                document.getElementById('deckInfo').textContent =
+                    `${this.deckInfo.name} - ${this.cards.length} kártya`;
+            }
+
+            showFileUpload() {
+                document.getElementById('app').innerHTML = `
+                    <div class="empty-state">
+                        <h2>Nincs betölthető kártyacsomag</h2>
+                        <p>Helyezz egy flashcards.json fájlt ugyanabba a mappába, vagy tölts fel egyet:</p>
+                        <div class="file-input-container">
+                            <label class="file-input-label" for="fileInput">
+                                JSON fájl feltöltése
+                            </label>
+                            <input type="file" id="fileInput" accept=".json">
+                        </div>
+                        <p style="margin-top: 20px; font-size: 0.8rem; color: #666;">
+                            A JSON formátum: { "deck": {...}, "cards": [{ "id": 1, "front": "...", "back": "..." }] }
+                        </p>
+                    </div>
+                `;
+
+                document.getElementById('fileInput').addEventListener('change', (e) => {
+                    this.handleFileUpload(e);
+                });
+            }
+
+            handleFileUpload(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        this.deckInfo = data.deck || { name: file.name, description: '' };
+                        this.cards = data.cards.map(card => ({
+                            ...card,
+                            ...SM2.defaultCard(),
+                            ...(this.getCardProgress(card.id) || {})
+                        }));
+
+                        document.getElementById('deckInfo').textContent =
+                            `${this.deckInfo.name} - ${this.cards.length} kártya`;
+
+                        this.buildStudyQueue();
+                        this.render();
+                    } catch (error) {
+                        alert('Hibás JSON formátum!');
+                    }
+                };
+                reader.readAsText(file);
+            }
+
+            loadProgress() {
+                try {
+                    const saved = localStorage.getItem(this.storageKey);
+                    if (saved) {
+                        this.progress = JSON.parse(saved);
+                    } else {
+                        this.progress = {};
+                    }
+                } catch {
+                    this.progress = {};
+                }
+            }
+
+            saveProgress() {
+                this.cards.forEach(card => {
+                    this.progress[card.id] = {
+                        easeFactor: card.easeFactor,
+                        interval: card.interval,
+                        repetitions: card.repetitions,
+                        nextReview: card.nextReview,
+                        lastReview: card.lastReview
+                    };
+                });
+                localStorage.setItem(this.storageKey, JSON.stringify(this.progress));
+            }
+
+            getCardProgress(cardId) {
+                return this.progress ? this.progress[cardId] : null;
+            }
+
+            buildStudyQueue() {
+                const now = Date.now();
+
+                // Cards due for review
+                const dueCards = this.cards.filter(card => card.nextReview <= now);
+
+                // Sort by: new cards first, then by next review date
+                dueCards.sort((a, b) => {
+                    if (a.repetitions === 0 && b.repetitions > 0) return -1;
+                    if (a.repetitions > 0 && b.repetitions === 0) return 1;
+                    return a.nextReview - b.nextReview;
+                });
+
+                this.studyQueue = dueCards;
+                this.currentIndex = 0;
+            }
+
+            getStats() {
+                const now = Date.now();
+                return {
+                    new: this.cards.filter(c => c.repetitions === 0).length,
+                    learning: this.cards.filter(c => c.repetitions > 0 && c.interval < 7).length,
+                    review: this.cards.filter(c => c.interval >= 7 && c.nextReview <= now).length,
+                    mastered: this.cards.filter(c => c.interval >= 21).length,
+                    due: this.studyQueue.length
+                };
+            }
+
+            getCurrentCard() {
+                return this.studyQueue[this.currentIndex];
+            }
+
+            flipCard() {
+                this.isFlipped = !this.isFlipped;
+                this.render();
+            }
+
+            rateCard(quality) {
+                const card = this.getCurrentCard();
+                if (!card) return;
+
+                const qualityMap = { again: 1, hard: 2, good: 3, easy: 5 };
+                const q = qualityMap[quality];
+
+                // Update card with SM-2
+                const updated = SM2.calculate(card, q);
+                Object.assign(card, updated);
+
+                // Update session stats
+                this.sessionStats.reviewed++;
+                this.sessionStats[quality]++;
+
+                // Save progress
+                this.saveProgress();
+
+                // Move to next card
+                this.currentIndex++;
+                this.isFlipped = false;
+
+                // Rebuild queue if needed (for "again" cards)
+                if (quality === 'again') {
+                    // Add back to end of queue
+                    this.studyQueue.push(card);
+                }
+
+                this.render();
+            }
+
+            resetProgress() {
+                if (confirm('Biztosan törölni szeretnéd az összes haladási adatot?')) {
+                    localStorage.removeItem(this.storageKey);
+                    this.progress = {};
+                    this.cards.forEach(card => {
+                        Object.assign(card, SM2.defaultCard());
+                    });
+                    this.sessionStats = { reviewed: 0, again: 0, hard: 0, good: 0, easy: 0 };
+                    this.buildStudyQueue();
+                    this.render();
+                }
+            }
+
+            getIntervalPreview(quality) {
+                const card = this.getCurrentCard();
+                if (!card) return '';
+
+                const qualityMap = { again: 1, hard: 2, good: 3, easy: 5 };
+                const preview = SM2.calculate({...card}, qualityMap[quality]);
+                return SM2.getNextReviewText(preview.interval);
+            }
+
+            render() {
+                const app = document.getElementById('app');
+                const stats = this.getStats();
+                const card = this.getCurrentCard();
+                const progress = this.currentIndex / Math.max(1, this.studyQueue.length) * 100;
+
+                if (this.cards.length === 0) {
+                    return; // File upload screen is shown
+                }
+
+                if (!card) {
+                    // Session complete
+                    app.innerHTML = `
+                        <div class="stats-bar">
+                            <div class="stat-item new">
+                                <div class="stat-value">${stats.new}</div>
+                                <div class="stat-label">Új</div>
+                            </div>
+                            <div class="stat-item learning">
+                                <div class="stat-value">${stats.learning}</div>
+                                <div class="stat-label">Tanulás</div>
+                            </div>
+                            <div class="stat-item review">
+                                <div class="stat-value">${stats.review}</div>
+                                <div class="stat-label">Ismétlés</div>
+                            </div>
+                            <div class="stat-item mastered">
+                                <div class="stat-value">${stats.mastered}</div>
+                                <div class="stat-label">Elsajátított</div>
+                            </div>
+                        </div>
+
+                        <div class="session-complete">
+                            <h2>Gratulálok!</h2>
+                            <p>Minden esedékes kártyát átnéztél.</p>
+
+                            <div class="session-stats">
+                                <div class="session-stat">
+                                    <div class="session-stat-value" style="color: #00ff88">${this.sessionStats.reviewed}</div>
+                                    <div class="session-stat-label">Átnézett</div>
+                                </div>
+                                <div class="session-stat">
+                                    <div class="session-stat-value" style="color: #27ae60">${this.sessionStats.good + this.sessionStats.easy}</div>
+                                    <div class="session-stat-label">Sikeres</div>
+                                </div>
+                                <div class="session-stat">
+                                    <div class="session-stat-value" style="color: #e74c3c">${this.sessionStats.again}</div>
+                                    <div class="session-stat-label">Újra</div>
+                                </div>
+                            </div>
+
+                            <div class="controls">
+                                <button class="control-btn" onclick="app.buildStudyQueue(); app.render();">
+                                    Frissítés
+                                </button>
+                                <button class="control-btn" onclick="app.resetProgress()">
+                                    Visszaállítás
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                app.innerHTML = `
+                    <div class="stats-bar">
+                        <div class="stat-item new">
+                            <div class="stat-value">${stats.new}</div>
+                            <div class="stat-label">Új</div>
+                        </div>
+                        <div class="stat-item learning">
+                            <div class="stat-value">${stats.learning}</div>
+                            <div class="stat-label">Tanulás</div>
+                        </div>
+                        <div class="stat-item review">
+                            <div class="stat-value">${stats.due}</div>
+                            <div class="stat-label">Esedékes</div>
+                        </div>
+                        <div class="stat-item mastered">
+                            <div class="stat-value">${stats.mastered}</div>
+                            <div class="stat-label">Elsajátított</div>
+                        </div>
+                    </div>
+
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width: ${progress}%"></div>
+                    </div>
+
+                    <div class="card-container" onclick="app.flipCard()">
+                        <div class="flashcard ${this.isFlipped ? 'flipped' : ''}">
+                            <div class="card-face card-front">
+                                <div class="card-number">${this.currentIndex + 1} / ${this.studyQueue.length}</div>
+                                <div class="card-tags">
+                                    ${(card.tags || []).map(t => `<span class="tag">${t}</span>`).join('')}
+                                </div>
+                                ${card.frontImage ? `<img src="${card.frontImage}" class="card-image" alt="">` : ''}
+                                <div class="card-content">${card.front}</div>
+                                <div class="card-hint">Kattints a megfordításhoz</div>
+                            </div>
+                            <div class="card-face card-back">
+                                <div class="card-number">${this.currentIndex + 1} / ${this.studyQueue.length}</div>
+                                ${card.backImage ? `<img src="${card.backImage}" class="card-image" alt="">` : ''}
+                                <div class="card-content">${card.back}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="rating-buttons ${this.isFlipped ? 'visible' : ''}">
+                        <button class="rating-btn again" onclick="event.stopPropagation(); app.rateCard('again')">
+                            Újra
+                            <span class="next-review">${this.getIntervalPreview('again')}</span>
+                        </button>
+                        <button class="rating-btn hard" onclick="event.stopPropagation(); app.rateCard('hard')">
+                            Nehéz
+                            <span class="next-review">${this.getIntervalPreview('hard')}</span>
+                        </button>
+                        <button class="rating-btn good" onclick="event.stopPropagation(); app.rateCard('good')">
+                            Jó
+                            <span class="next-review">${this.getIntervalPreview('good')}</span>
+                        </button>
+                        <button class="rating-btn easy" onclick="event.stopPropagation(); app.rateCard('easy')">
+                            Könnyű
+                            <span class="next-review">${this.getIntervalPreview('easy')}</span>
+                        </button>
+                    </div>
+
+                    <div class="controls">
+                        <button class="control-btn" onclick="app.resetProgress()">
+                            Visszaállítás
+                        </button>
+                    </div>
+                `;
+            }
+
+            bindEvents() {
+                document.addEventListener('keydown', (e) => {
+                    if (e.target.tagName === 'INPUT') return;
+
+                    switch(e.key) {
+                        case ' ':
+                            e.preventDefault();
+                            this.flipCard();
+                            break;
+                        case '1':
+                            if (this.isFlipped) this.rateCard('again');
+                            break;
+                        case '2':
+                            if (this.isFlipped) this.rateCard('hard');
+                            break;
+                        case '3':
+                            if (this.isFlipped) this.rateCard('good');
+                            break;
+                        case '4':
+                            if (this.isFlipped) this.rateCard('easy');
+                            break;
+                        case 'r':
+                        case 'R':
+                            this.resetProgress();
+                            break;
+                    }
+                });
+
+                // File input handler for loading custom JSON
+                document.getElementById('fileInput').addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        try {
+                            const data = JSON.parse(event.target.result);
+                            this.deckInfo = data.deck || { name: file.name, description: '' };
+                            this.cards = data.cards.map(card => ({
+                                ...card,
+                                ...SM2.defaultCard()
+                            }));
+
+                            document.getElementById('deckInfo').textContent =
+                                `${this.deckInfo.name} - ${this.cards.length} kártya`;
+
+                            this.sessionStats = { reviewed: 0, again: 0, hard: 0, good: 0, easy: 0 };
+                            this.buildStudyQueue();
+                            this.render();
+                        } catch (error) {
+                            alert('Hibás JSON formátum! Ellenőrizd a fájlt.');
+                        }
+                    };
+                    reader.readAsText(file);
+                    e.target.value = ''; // Reset input
+                });
+            }
+        }
+
+        // Initialize app
+        const app = new FlashcardApp();
+    </script>
+</body>
+</html>

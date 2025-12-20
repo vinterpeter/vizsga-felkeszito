@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tanulás - Harci Kiszolgáló Támogatás</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 1rem;
+        }
+
+        /* Screen management */
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* Topic Selection Screen */
+        .section-title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: #00d9ff;
+            text-align: center;
+        }
+
+        .topics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .topic-card {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .topic-card:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(0, 217, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .topic-card.selected {
+            background: rgba(0, 217, 255, 0.15);
+            border-color: #00d9ff;
+        }
+
+        .topic-card .topic-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .topic-card .topic-count {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .select-all-btn {
+            display: block;
+            margin: 0 auto 30px;
+            padding: 10px 25px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .select-all-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* Mode Selection */
+        .mode-selection {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .mode-card {
+            flex: 1;
+            max-width: 300px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .mode-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .mode-card.quiz:hover {
+            border-color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        .mode-card.flashcard:hover {
+            border-color: #00d9ff;
+            background: rgba(0, 217, 255, 0.1);
+        }
+
+        .mode-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .mode-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .mode-card.quiz .mode-title { color: #ff6b6b; }
+        .mode-card.flashcard .mode-title { color: #00d9ff; }
+
+        .mode-desc {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .start-btn {
+            display: block;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 18px;
+            background: linear-gradient(145deg, #00d9ff, #0099cc);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .start-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 217, 255, 0.4);
+        }
+
+        .start-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .selected-info {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #888;
+        }
+
+        /* Back button */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            height: 8px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-bar.quiz { background: linear-gradient(90deg, #ff6b6b, #feca57); }
+        .progress-bar.flashcard { background: linear-gradient(90deg, #00d9ff, #00ff88); }
+
+        /* Flashcard Styles */
+        .card-container {
+            perspective: 1000px;
+            margin-bottom: 30px;
+        }
+
+        .flashcard {
+            width: 100%;
+            height: 300px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .card-front {
+            background: linear-gradient(145deg, #2a2a4a, #1e1e3a);
+            border: 2px solid rgba(0, 217, 255, 0.3);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-back {
+            background: linear-gradient(145deg, #1e3a2a, #1a2e1e);
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            transform: rotateY(180deg);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-content {
+            font-size: 1.3rem;
+            line-height: 1.6;
+            white-space: pre-line;
+        }
+
+        .card-hint {
+            position: absolute;
+            bottom: 20px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .card-number {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .card-tags {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .tag {
+            background: rgba(255,255,255,0.1);
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            color: #888;
+        }
+
+        /* Rating Buttons */
+        .rating-buttons {
+            display: none;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .rating-buttons.visible {
+            display: flex;
+        }
+
+        .rating-btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #fff;
+        }
+
+        .rating-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .rating-btn.again { background: linear-gradient(145deg, #e74c3c, #c0392b); }
+        .rating-btn.hard { background: linear-gradient(145deg, #e67e22, #d35400); }
+        .rating-btn.good { background: linear-gradient(145deg, #27ae60, #1e8449); }
+        .rating-btn.easy { background: linear-gradient(145deg, #3498db, #2980b9); }
+
+        .rating-btn .next-review {
+            display: block;
+            font-size: 0.7rem;
+            opacity: 0.8;
+            margin-top: 3px;
+        }
+
+        /* Quiz Styles */
+        .question-card {
+            background: linear-gradient(145deg, #2a2a4a, #1e1e3a);
+            border: 2px solid rgba(255, 107, 107, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .question-number {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .question-tags {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .answers-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .answer-btn {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .answer-btn:hover:not(:disabled) {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .answer-btn:disabled {
+            cursor: default;
+        }
+
+        .answer-btn.correct {
+            background: rgba(0, 255, 136, 0.2);
+            border-color: #00ff88;
+        }
+
+        .answer-btn.incorrect {
+            background: rgba(255, 107, 107, 0.2);
+            border-color: #ff6b6b;
+        }
+
+        .answer-btn.show-correct {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: rgba(0, 255, 136, 0.5);
+        }
+
+        .answer-key {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            text-align: center;
+            line-height: 28px;
+            margin-right: 12px;
+            font-weight: bold;
+        }
+
+        .answer-btn.correct .answer-key {
+            background: #00ff88;
+            color: #1a1a2e;
+        }
+
+        .answer-btn.incorrect .answer-key {
+            background: #ff6b6b;
+            color: #1a1a2e;
+        }
+
+        /* Feedback */
+        .feedback {
+            text-align: center;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .feedback.visible {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .feedback.incorrect {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+        }
+
+        .feedback-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .feedback-text {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .feedback-explanation {
+            color: #aaa;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* Next/Control Buttons */
+        .next-btn {
+            display: none;
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(145deg, #ff6b6b, #ee5a5a);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .next-btn.visible {
+            display: block;
+        }
+
+        .next-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .control-btn {
+            padding: 12px 30px;
+            border: 2px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.4);
+        }
+
+        /* Session Complete */
+        .session-complete {
+            text-align: center;
+            padding: 40px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+        }
+
+        .session-complete h2 {
+            color: #00ff88;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: conic-gradient(#00ff88 var(--score), rgba(255,255,255,0.1) 0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 30px auto;
+            position: relative;
+        }
+
+        .score-circle::before {
+            content: '';
+            width: 120px;
+            height: 120px;
+            background: #1e1e3a;
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        .score-value {
+            position: relative;
+            z-index: 1;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .session-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .session-stat {
+            text-align: center;
+        }
+
+        .session-stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .session-stat-label {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        /* Shortcuts */
+        .shortcuts {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 15px;
+        }
+
+        .shortcuts h4 {
+            color: #888;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .shortcut-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .shortcut {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+        }
+
+        .key {
+            background: rgba(255,255,255,0.1);
+            padding: 4px 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            color: #00d9ff;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 60px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top-color: #00d9ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .mode-selection {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .mode-card {
+                max-width: 100%;
+            }
+
+            .answers-container {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-bar {
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .stat-item {
+                flex: 1 1 40%;
+            }
+
+            .flashcard {
+                height: 280px;
+            }
+
+            .topics-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Tanulás</h1>
+            <p class="subtitle" id="subtitle">Harci Kiszolgáló Támogatás - Vizsgafelkészítő</p>
+        </header>
+
+        <div id="app">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Betöltés...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== DATA ====================
+        const DATA = {
+            deck: {
+                name: "Harci kiszolgáló támogatás - Vizsgafelkészítő",
+                description: "A Magyar Honvédség harci kiszolgáló támogatás tananyaga"
+            },
+            cards: [
+                {id: 1, front: "Mik a logisztikai támogatás alapelvei?", back: "1. A műveletek elsődlegessége\n2. Az egyszerűség\n3. A rugalmasság\n4. A gazdaságosság\n5. A rendelkezésre állás (elérhetőség és elégségesség)\n6. A fenntarthatóság\n7. A túlélőképesség\n8. A felelősség", tags: ["logisztika", "alapelvek"]},
+                {id: 2, front: "Mi a DOS (Day of Supply)?", back: "Átlagos napi felhasználás (Day of Supply) - a készletek mértékegysége, amely megmutatja, hogy az adott készlet hány napi átlagos felhasználást fedez.", tags: ["logisztika", "DOS"]},
+                {id: 3, front: "Mennyi DOS-t tartalmaz a zászlóalj készlet?", back: "A zászlóalj készletek 5 átlagos napi felhasználást (5 DOS) fedeznek. A készleteket a századoknál, ütegeknél, harcjárművekben, harcoló állománynál és a zászlóalj ellátó szervezeteinél alakítják meg.", tags: ["logisztika", "készlet"]},
+                {id: 4, front: "Mennyi DOS-t tartalmaz a dandár készlet?", back: "A dandár (ezred) készletek a katonai műveletek során a szervezetszerű alegységek 2 átlagos napi felhasználásnak (2 DOS) megfelelő hadfelszerelést tartalmaznak.", tags: ["logisztika", "készlet"]},
+                {id: 5, front: "Mi a különbség a Push és Pull ellátás között?", back: "Push (Tőlem): az elöljáró kiszállítja a készleteket az alárendeltekhez.\nPull (Hozzám): az alárendelt vételezi a készleteket az elöljárótól.\nA kettő kombinálása is alkalmazható.", tags: ["logisztika", "ellátás"]},
+                {id: 6, front: "Mik a logisztika funkcionális területei?", back: "1. Ellátás, tárolás\n2. Üzemben tartás (üzemfenntartás, helyreállítás)\n3. Mozgatás-szállítás", tags: ["logisztika", "funkciók"]},
+                {id: 7, front: "Mik a logisztika ágazati területei?", back: "1. Hadtáp támogatás\n2. Haditechnikai támogatás\n3. Közlekedési támogatás\n4. Katonai elhelyezési és infrastrukturális támogatás", tags: ["logisztika", "ágazatok"]},
+                {id: 8, front: "Mik a hadtáp támogatás szakágai?", back: "1. Élelmezési biztosítás\n2. Üzemanyag biztosítás\n3. Ruházati biztosítás\n4. Humánanyag biztosítás\n5. Térképészeti anyagbiztosítás", tags: ["logisztika", "hadtáp"]},
+                {id: 9, front: "Mik a haditechnikai támogatás szakágai?", back: "1. Páncélos- és gépjármű-technikai biztosítás\n2. Fegyverzettechnikai biztosítás\n3. Elektronikai biztosítás\n4. Műszaki technikai biztosítás\n5. Vegyivédelmi technikai biztosítás\n6. Repülő-műszaki biztosítás\n7. Mérésügyi biztosítás", tags: ["logisztika", "haditechnika"]},
+                {id: 10, front: "Mi a helyreállítás?", back: "Az üzemképtelen, meghatározott üzemeltetési normáját elért haditechnikai eszközök üzemképességének visszaállítása. Főbb elemei: technikai felderítés, vontatás, szállítás a javítás helyszínére, javítás, üzemeltetőhöz visszajuttatás vagy újraelosztás.", tags: ["logisztika", "haditechnika"]},
+                {id: 11, front: "Mi a TZR (Technikai Zárórészleg)?", back: "A menetoszlop végén haladó technikai biztosító elem. Felkészül technikai, egészségügyi és helyszíni forgalomszabályozási feladatok végzésére. Ha a javítás helyszínen max 15-20 perc alatt nem végezhető, a meghibásodott járművet a következő pihenőig vontatják.", tags: ["logisztika", "menet"]},
+                {id: 12, front: "Mik a tábori elhelyezés övezetei?", back: "1. Parancsnoki és szolgálati övezet\n2. Kiképzési övezet, sport- és szabadidős övezet\n3. Technikai övezet\n4. Raktárövezet\n5. Elhelyezési övezet\n6. Övezetbe nem sorolható létesítmények (védelmi, óvóhely)", tags: ["logisztika", "tábor"]},
+                {id: 13, front: "Mik a táborhely szemrevételezésének területei?", back: "a) Hadműveleti: őrzés-védelem\nb) Műszaki: erődítés, álcázás\nc) Elhelyezési: infrastruktúra, víz\nd) Közegészségügyi\ne) Logisztikai: raktározás, közlekedés\nf) Híradó: hálózat kiépítés\ng) Vegyvédelmi: ABV, tűzvédelem\nh) Térképészeti", tags: ["logisztika", "tábor"]},
+                {id: 14, front: "Mi a logisztikai csoportosítás?", back: "A szakalegységekből létrehozott ideiglenes, a végrehajtás fázisaihoz igazodó logisztikai harcrendi elemek megalakítása és egységes rendszerben történő működése. Lehet stacioner vagy mobil.", tags: ["logisztika", "csoportosítás"]},
+                {id: 15, front: "Mi a harcparancs logisztikai mellékletének (R melléklet) tartalma?", back: "- Logisztikai támogatás feladatai és prioritásai\n- Ellátási prioritások fázisok szerint\n- Kijelölt logisztikai erőforrások\n- Nemzetgazdasági erőforrások\n- Fogyasztási normák\n- Készletképzés és ellátás rendje\n- Helyreállítás rendje\n- CIMIC feladatok", tags: ["logisztika", "tervezés"]},
+                {id: 16, front: "Mi a LUR (Logisztikai Utaltsági Rend)?", back: "A HVK által évente összeállított és a HM KÁT által kiadott dokumentum, amely meghatározza a logisztikai gazdasági szervvel nem rendelkező honvédelmi szervezetek intézményi logisztikai ellátását végző kijelölt honvédségi szervezetet.", tags: ["logisztika", "gazdálkodás"]},
+                {id: 17, front: "Mi az egészségügyi biztosítás definíciója?", back: "A haderő személyi állománya egészségének megóvása, helyreállítása érdekében végzett tervszerű, folyamatos tevékenység. Célja a feladatot végrehajtó csapatok egészségének, erejének és mentális állapotának megőrzése, illetve helyreállítása.", tags: ["egészségügy", "alapfogalom"]},
+                {id: 18, front: "Mik az egészségügyi biztosítás főbb területei?", back: "1. Megelőzés (prevenció)\n2. Egészségügyi kiürítés\n3. Gyógyítás\n4. Anyagi-technikai biztosítás (logisztikai)\n5. Kiképzés\n6. Kutatás és fejlesztés", tags: ["egészségügy", "területek"]},
+                {id: 19, front: "Mi a 10-1-2+2 szabály?", back: "Egészségügyi időfaktorok:\n- 10 perc: elsősegély (vérzéscsillapítás, légútbiztosítás)\n- 1 óra: prehospitális sürgősségi ellátás (DCR)\n- 2 óra: sebészeti beavatkozás (DCS)\n- +2 óra: további sebészeti, diagnosztikai ellátás stratégiai kiürítéshez", tags: ["egészségügy", "időfaktor"]},
+                {id: 20, front: "Mi az IFAK?", back: "Improved First Aid Kit - személyi elsősegély felszerelés. Minden katona rendelkezik vele, és képes kell legyen a saját vagy társa ellátását megkezdeni a sérülés helyszínén.", tags: ["egészségügy", "felszerelés"]},
+                {id: 21, front: "Ki a HÉK (Harctéri Életmentő Katona)?", back: "Combat Life Saver (CLS) - polgári egészségügyi szakképzettséggel nem rendelkező katona, aki tanfolyamon sajátítja el a TCCC alapjait. Képes perifériás vénabiztosításra, infúzió adásra, mellkasfél tűdetenzionálására.", tags: ["egészségügy", "szintek"]},
+                {id: 22, front: "Mik az egészségügyi biztosítási szintek?", back: "1. Ön- és kölcsönös segély (IFAK)\n2. HÉK - Harctéri életmentő katona (CLS készlet)\n3. Első szaksegély - felcser (EEK II)\n4. Emelt szintű szaksegély - mentőtiszt (EEK I)\n5. Első orvosi segély - orvos (EEK I)\n6. HMK/MES - különleges műveleti medic-ek", tags: ["egészségügy", "szintek"]},
+                {id: 23, front: "Mi a Role 1?", back: "Zászlóalj/ezred kötelékében elhelyezkedő egészségügyi központ, szakasznyi erő. A prehospitális ellátás része. Feladatai: napi betegellátás, sürgősségi ellátás, sérült stabilizálása, TRIAGE, kiürítés. Sátras kialakítású, a harcérintkezéstől 3-5 km-re települ.", tags: ["egészségügy", "Role"]},
+                {id: 24, front: "Mi a Role 2?", back: "Dandár egészségügyi szervezete, század szintű erő. Megjelenik a sebészeti ellátás (DCS). Képességei: DCR, DCS, postoperatív ellátás, intenzív részleg, diagnosztika (röntgen, UH), labor, vérkészlet. Sátrak és konténerek kombinációja.", tags: ["egészségügy", "Role"]},
+                {id: 25, front: "Mi a különbség a Role 2 Basic és Enhanced között?", back: "Role 2 Basic (R2B): alap sebészeti és intenzív képességek.\nRole 2 Enhanced (R2E): kibővített képességek és kapacitások, többre képes mint a Basic szint.", tags: ["egészségügy", "Role"]},
+                {id: 26, front: "Mi a Role 3?", back: "Általában stacioner egészségügyi létesítmény. A Role 2 képességein felül további szakterületeket tartalmaz: CT, idegsebészet, fogászat. Áttelepítése nem vagy csak nehezen megvalósítható. Hazai viszonylatban: nagyobb városi vagy megyei kórház.", tags: ["egészségügy", "Role"]},
+                {id: 27, front: "Mi a Role 4?", back: "Az adott nemzet saját működtetésű teljesen stacioner kórháza, mely mind a definitív ellátás széles spektrumára, mind a rehabilitációra képes. MH szempontjából pl.: Észak-Pesti Centrumkórház - Honvédkórház.", tags: ["egészségügy", "Role"]},
+                {id: 28, front: "Mi a TCCC (Tactical Combat Casualty Care)?", back: "Taktikai harctéri sérültellátás - a sérült ellátását a taktikai helyzethez adaptáljuk. Fázisai:\n1. Tűz/fenyegetettség alatti ellátás\n2. Taktikai harctéri ellátás\n3. Taktikai kiürítés alatti ellátás", tags: ["egészségügy", "TCCC"]},
+                {id: 29, front: "Mi a különbség a MEDEVAC és CASEVAC között?", back: "MEDEVAC: egészségügyi kiürítés - erre kijelölt egészségügyi szakállomány, erre kialakított eszközzel, folyamatos egészségügyi ellátással.\nCASEVAC: nem felügyelt szállítás - nem egészségügyi eszközzel, nem feltétlenül megfelelő ellátással. Akkor alkalmazzák, ha MEDEVAC nem áll rendelkezésre.", tags: ["egészségügy", "kiürítés"]},
+                {id: 30, front: "Mik a MEDEVAC típusai?", back: "1. Előretolt MEDEVAC: sérülés helyszínéről az első ellátóhelyig (földi, helikopter)\n2. Taktikai MEDEVAC: hadszíntéren belüli szállítás MTF-ek között\n3. STRATEVAC: hadszínterek közötti/hazai kiürítés (repülő, vonat, hajó)", tags: ["egészségügy", "kiürítés"]},
+                {id: 31, front: "Mi a PECC?", back: "Patient Evacuation Coordination Cell/Centre - Beteg Kiürítést Koordináló Központ. Célja: minden sérült az állapotának megfelelő legjobb ellátást kapja, optimális szállítókapacitás és MTF kihasználás mellett.", tags: ["egészségügy", "PECC"]},
+                {id: 32, front: "Mik a PECC feladatai?", back: "1. Betegszállítás koordinálása\n2. Betegek nyomon követése\n3. Kiürítési folyamatok koordinálása\n4. Egészségügyi jelentések összegzése\n5. Harcérték és készletek nyilvántartása\n6. MTF-ek ágyszámának és felszereltségének figyelése", tags: ["egészségügy", "PECC"]},
+                {id: 33, front: "Mit jelent a Priority 1 / URGENS sérültkategória?", back: "A sérült azonnali szállítást igényel élet-, végtag- és funkciómentő beavatkozásra. Célja súlyos komplikáció, maradandó fogyatékosság megakadályozása. Ajánlott kiürítési idő: minél előbb, de max 12 óra.", tags: ["egészségügy", "prioritás"]},
+                {id: 34, front: "Mit jelent a Priority 2 / ELSŐBBSÉGI sérültkategória?", back: "A sérült sürgős szállítása szükséges, de sérülései nem életveszélyesek. Speciális kezelésre van szüksége, ami az adott helyen nem elérhető. Cél: fájdalom csökkentése, maradandó károsodás elkerülése. Ajánlott kiürítési idő: <24 óra.", tags: ["egészségügy", "prioritás"]},
+                {id: 35, front: "Mit jelent a Priority 3 / RUTIN sérültkategória?", back: "A sérült további ellátást igényel, de ez halaszthatóbb mint P1 és P2 esetén. Ide tartozik a rutin betegek szállítása és a honi hazaszállítás. Javasolt idő: maximum 72 óra.", tags: ["egészségügy", "prioritás"]},
+                {id: 36, front: "Mi a TRIAGE?", back: "Betegosztályozás - a betegek/sérültek ellátási és kiürítési prioritásának meghatározása a rendelkezésre álló erőforrások és a sérültek állapota alapján.", tags: ["egészségügy", "TRIAGE"]},
+                {id: 37, front: "Mi a MASCAL?", back: "Mass Casualty - tömeges sérültáramlás. Olyan helyzet, amikor a sérültek száma meghaladja az elérhető egészségügyi kapacitásokat.", tags: ["egészségügy", "MASCAL"]},
+                {id: 38, front: "Mit jelent a METHANE jelentés?", back: "M - Military details (katonai adatok)\nE - Exact location (pontos helyszín)\nT - Time and type of incident (idő és típus)\nH - Hazards in the area (veszélyek)\nA - Approach routes (megközelítési útvonalak)\nN - Number of casualties (sérültek száma)\nE - Expected response (elvárt válasz)", tags: ["egészségügy", "jelentés"]},
+                {id: 39, front: "Mi a MEDAD?", back: "Medical Adviser - egészségügyi tanácsadó. A parancsnok tanácsadója egészségügyi vonatkozású döntésekben. A dandár törzsébe tervezett egészségügyi főtiszt.", tags: ["egészségügy", "szervezet"]},
+                {id: 40, front: "Mi az FST (Forward Surgical Team)?", back: "Előretolt sebészcsoport - olyan megoldás, ami nem követi a Role szinteket. A sebészeti képességet előretolt pozícióban biztosítja, akár Role 1 kiegészítéseként.", tags: ["egészségügy", "szervezet"]},
+                {id: 41, front: "Mit jelent a DCR és DCS?", back: "DCR - Damage Control Resuscitation: prehospitális (kórház előtti) sürgősségi ellátás, 1 órán belül.\nDCS - Damage Control Surgery: élet-, végtag- és funkciómentő sebészeti beavatkozás, 2 órán belül.", tags: ["egészségügy", "ellátás"]},
+                {id: 42, front: "Mit jelent az LLE rövidítés?", back: "Life, Limb, Eyesight - az egészségügyi ellátás prioritásai: élet, végtag, látás. Ebben a sorrendben kell a beavatkozásokat priorizálni.", tags: ["egészségügy", "rövidítés"]},
+                {id: 43, front: "Mik a betegekre vonatkozó rövidítések?", back: "D - Disease (betegség)\nDNBI - Disease and Non-Battle Injuries (betegség és nem harci sérülés)\nBS - Battle Stress (harci stressz)\nKIA - Killed in Action (harcban elesett)\nWIA - Wounded in Action (harcban sebesült)\nMIA - Missing in Action (eltűnt)", tags: ["egészségügy", "rövidítés"]},
+                {id: 44, front: "Mi a 9-liner jelentés?", back: "A MEDEVAC igény helyszínről történő jelzésére használt szabványos jelentésformátum, amely 9 pontban tartalmazza a kiürítéshez szükséges információkat.", tags: ["egészségügy", "jelentés"]},
+                {id: 45, front: "Mi a PMR (Patient Movement Request)?", back: "A STRATEVAC (stratégiai kiürítés) igényeknél használt jelentés. Összeállítását az egészségügyi személyzet végzi.", tags: ["egészségügy", "jelentés"]},
+                {id: 46, front: "Mi a CSU (Casualty Staging Unit)?", back: "A stratégiai kiürítés során egy köztes, átmeneti ellátópont, ahol a sérültek felkészítése történik a további szállításra.", tags: ["egészségügy", "szervezet"]},
+                {id: 47, front: "Mi az MRoE (Medical Rules of Eligibility)?", back: "A különböző 'jogállású' sérültek/betegek ellátásának kötelezettsége és szintje. Pl.: saját katonai erő, hadifogoly (PoW), civil - eltérő ellátási kötelezettségekkel.", tags: ["egészségügy", "szabály"]},
+                {id: 48, front: "Mi az egészségügyi felderítés?", back: "Orvosi, biológiai-tudományos, járványügyi és környezeti információk gyűjtése, kiértékelése, elemzése. Része a katonai és civil egészségügyi képességek felmérése a megelőző egészségügyi biztosítási feladatok tervezéséhez.", tags: ["egészségügy", "felderítés"]},
+                {id: 49, front: "Milyen páncélozott sebesültszállítók vannak az MH-ban?", back: "BTR-SKJ és LYNX AMB. Szerencsés, ha a sebesültszállító a csapatszállítóval azonos platformon szerelt, így együtt tudnak mozogni a harcoló alegységekkel.", tags: ["egészségügy", "eszköz"]},
+                {id: 50, front: "Hol működik a PECC dandár szinten?", back: "A dandár harcvezetési ponton (TOC). Koordinálja a Role 1 → Role 2 és a Role 2 → magasabb szintű MTF közötti kiürítést.", tags: ["egészségügy", "szervezet"]}
+            ],
+            questions: [
+                {id: 1, question: "Mik a logisztikai támogatás alapelvei?", answers: ["Csak gazdaságosság és hatékonyság", "Műveletek elsődlegessége, egyszerűség, rugalmasság, gazdaságosság, együttműködés, láthatóság", "Gyorsaság és pontosság", "Csak az utánpótlás biztosítása"], correct: 1, explanation: "A logisztikai támogatás alapelvei: a műveletek elsődlegessége, egyszerűség, rugalmasság, gazdaságosság, együttműködés, láthatóság.", tags: ["logisztika", "alapelvek"]},
+                {id: 2, question: "Mi a DOS (Day of Supply) jelentése?", answers: ["Napi ellátmány - egy adott hadianyagból egy napra szükséges mennyiség", "Digitális műveleti rendszer", "Támadási nap megnevezése", "Dandár szervezési séma"], correct: 0, explanation: "DOS = Day of Supply (napi ellátmány) - adott hadianyagból egy napra szükséges mennyiség norma szerinti felhasználással.", tags: ["logisztika", "DOS"]},
+                {id: 3, question: "Hány DOS lőszerkészletet tart a zászlóalj?", answers: ["2 DOS", "3 DOS", "5 DOS", "10 DOS"], correct: 2, explanation: "A zászlóalj 5 DOS lőszerkészletet tart (üzemi: 3 DOS + tartalék: 2 DOS).", tags: ["logisztika", "DOS"]},
+                {id: 4, question: "Hány DOS készletet tart a dandár?", answers: ["2 DOS", "5 DOS", "7 DOS", "10 DOS"], correct: 0, explanation: "A dandár 2 DOS készletet tart a zászlóaljak feltöltésére.", tags: ["logisztika", "DOS"]},
+                {id: 5, question: "Mi a PUSH logisztika lényege?", answers: ["Az igénylő szervezet kéri az ellátmányt", "Az ellátó szerv előre megtervezetten tolósíkban szállít", "Helyi beszerzés a hadműveleti területen", "Csak sürgősségi szállítás"], correct: 1, explanation: "PUSH logisztika = az ellátó szerv előre megtervezetten, folyamatosan tolósíkban szállítja az ellátmányt a felhasználó felé.", tags: ["logisztika", "ellátás"]},
+                {id: 6, question: "Mi a PULL logisztika lényege?", answers: ["Az ellátó szerv előre megtervezett szerint szállít", "Az igénylő szervezet kezdeményezi az ellátást", "Légi utánpótlás végrehajtása", "Tartalékok elosztása"], correct: 1, explanation: "PULL logisztika = az igénylő szervezet kezdeményezése az ellátás iránt (húzósík).", tags: ["logisztika", "ellátás"]},
+                {id: 7, question: "Mi a ROLE 1 egészségügyi ellátás feladata?", answers: ["Sebészi ellátás", "Elsősegélynyújtás és azonnali életmentés", "Kórházi ellátás", "Rehabilitáció"], correct: 1, explanation: "ROLE 1 = elsősegélynyújtás, azonnali életmentő beavatkozás, válogatás, stabilizálás, kiürítésre előkészítés.", tags: ["egészségügy", "Role"]},
+                {id: 8, question: "Hol található a ROLE 1 egészségügyi képesség?", answers: ["Dandár szinten", "Zászlóalj szinten", "Hadosztály szinten", "Stratégiai szinten"], correct: 1, explanation: "ROLE 1 a zászlóalj szintjén található, ez az elsődleges egészségügyi ellátás szintje.", tags: ["egészségügy", "Role"]},
+                {id: 9, question: "Mi a ROLE 2 egészségügyi ellátás fő jellemzője?", answers: ["Csak elsősegélynyújtás", "Sebészi sürgősségi ellátás és stabilizálás", "Teljes kórházi ellátás", "Csak kiürítés"], correct: 1, explanation: "ROLE 2 = resuscitáció, válogatás, sürgősségi sebészeti ellátás, műtét, kórházi tartózkodás, kiürítésre előkészítés.", tags: ["egészségügy", "Role"]},
+                {id: 10, question: "Mit jelent a TCCC rövidítés?", answers: ["Tactical Combat Casualty Care - harcászati sebesültellátás", "Total Combat Communication Center", "Transport and Cargo Control Command", "Temporary Camp Command Center"], correct: 0, explanation: "TCCC = Tactical Combat Casualty Care - harcászati sebesültellátás, harctéri körülmények közötti ellátási protokoll.", tags: ["egészségügy", "TCCC"]},
+                {id: 11, question: "Mik a TCCC fázisai?", answers: ["Előzetes, utólagos, végső", "Tűz alatti ellátás, harcászati terepen ellátás, kiürítés alatti ellátás", "Válogatás, műtét, rehabilitáció", "Diagnosztika, terápia, utógondozás"], correct: 1, explanation: "A TCCC három fázisa: 1. Tűz alatti ellátás (CUF), 2. Harcászati terepen ellátás (TFC), 3. Kiürítés alatti ellátás (TACEVAC).", tags: ["egészségügy", "TCCC"]},
+                {id: 12, question: "Mi a '10-1-2+2' szabály a katonai egészségügyben?", answers: ["10 orvos, 1 ápoló, 2+2 mentős", "10 perc elsősegély, 1 óra ROLE 1, 2 óra ROLE 2, +2 óra ROLE 3", "10 sérült, 1 autó, 2+2 kísérő", "10 km, 1 híd, 2+2 akadály"], correct: 1, explanation: "A 10-1-2+2 szabály: 10 perc elsősegély, 1 óra alatt ROLE 1-be, 2 óra alatt ROLE 2-be, további 2 óra alatt ROLE 3-ba juttatás.", tags: ["egészségügy", "időfaktor"]},
+                {id: 13, question: "Mi a MEDEVAC jelentése?", answers: ["Medical Evacuation - egészségügyi kiürítés dedikált eszközzel", "Medicine Evaluation", "Medical Vehicle Command", "Mental Development Activity"], correct: 0, explanation: "MEDEVAC = Medical Evacuation - egészségügyi kiürítés dedikált orvosi felszereléssel és személyzettel ellátott eszközzel.", tags: ["egészségügy", "kiürítés"]},
+                {id: 14, question: "Mi a különbség a MEDEVAC és CASEVAC között?", answers: ["Nincs különbség", "MEDEVAC: orvosi eszközzel, CASEVAC: bármilyen elérhető eszközzel", "MEDEVAC: légi, CASEVAC: földi", "MEDEVAC: nappal, CASEVAC: éjjel"], correct: 1, explanation: "MEDEVAC: dedikált orvosi felszereléssel ellátott eszközzel, CASEVAC: bármilyen elérhető, nem feltétlenül orvosi eszközzel.", tags: ["egészségügy", "kiürítés"]},
+                {id: 15, question: "Mit jelent a PRIORITY 1 (URGENT) kiürítési kategória?", answers: ["Stabil állapot, várhat", "2 órán belüli kiürítés életmentéshez szükséges", "Halott sérült", "Mozgásképes sérült"], correct: 1, explanation: "PRIORITY 1 (URGENT) = sürgős, 2 órán belüli kiürítés szükséges az életmentéshez vagy végtagmentéshez.", tags: ["egészségügy", "prioritás"]},
+                {id: 16, question: "Mi a PECC jelentése?", answers: ["Patient Evacuation Coordination Cell - betegkiürítés-koordináló cella", "Primary Emergency Care Center", "Personnel Equipment Command Center", "Patrol Element Control Command"], correct: 0, explanation: "PECC = Patient Evacuation Coordination Cell - a kiürítés koordinálásáért felelős szervezeti elem.", tags: ["egészségügy", "PECC"]},
+                {id: 17, question: "Mi a ROLE 3 egészségügyi ellátás jellemzője?", answers: ["Elsősegélynyújtás", "Tábori kórház, teljes körű kórházi ellátás", "Csak válogatás", "Rehabilitáció otthon"], correct: 1, explanation: "ROLE 3 = tábori kórház, teljes körű kórházi ellátás, minden sebészeti szakág, diagnosztika, intenzív ellátás.", tags: ["egészségügy", "Role"]},
+                {id: 18, question: "Mi a ROLE 4 egészségügyi ellátás?", answers: ["Harctéri elsősegély", "Zászlóalj egészségügyi pont", "Stratégiai kiürítés és rehabilitáció a honi területen", "Dandár szintű ellátás"], correct: 2, explanation: "ROLE 4 = stratégiai szintű ellátás, honi területen lévő kórházak, teljes rehabilitáció.", tags: ["egészségügy", "Role"]},
+                {id: 19, question: "Mit jelent az IFAK rövidítés?", answers: ["Infantry First Aid Kit - egyéni elsősegélykészlet", "Integrated Field Attack Kit", "Internal Force Action Key", "Infantry Field Armor Kit"], correct: 0, explanation: "IFAK = Individual First Aid Kit - egyéni elsősegélykészlet, amit minden katona magánál hord.", tags: ["egészségügy", "felszerelés"]},
+                {id: 20, question: "Mi a készletlépcsőzés célja?", answers: ["Készletek csökkentése", "Készletek szintenkénti elosztása a gyors reagálás érdekében", "Készletek központosítása", "Készletek megsemmisítése"], correct: 1, explanation: "A készletlépcsőzés célja a készletek szintenkénti (zászlóalj, dandár, hadosztály) elosztása a gyors utánpótlás érdekében.", tags: ["logisztika", "készlet"]},
+                {id: 21, question: "Mi a TRIAGE célja?", answers: ["Sérültek azonosítása", "Sérültek sürgősség szerinti csoportosítása az ellátáshoz", "Gyógyszerek elosztása", "Ápolók beosztása"], correct: 1, explanation: "A válogatás (triage) célja a sérültek súlyosság és sürgősség szerinti csoportosítása az ellátási sorrend meghatározásához.", tags: ["egészségügy", "TRIAGE"]},
+                {id: 22, question: "Melyik a helyes kiürítési lánc?", answers: ["ROLE 4 → ROLE 3 → ROLE 2 → ROLE 1", "ROLE 1 → ROLE 2 → ROLE 3 → ROLE 4", "Véletlenszerű", "Csak ROLE 1 és ROLE 4"], correct: 1, explanation: "A kiürítési lánc: ROLE 1 (zászlóalj) → ROLE 2 (dandár) → ROLE 3 (tábori kórház) → ROLE 4 (honi kórházak).", tags: ["egészségügy", "kiürítés"]},
+                {id: 23, question: "Mit jelent a Combat Lifesaver (CLS) program?", answers: ["Harci életmentő - alapszintű egészségügyi képzés nem-egészségügyi katonáknak", "Életbiztosítási program", "Harctéri lélekgyógyászat", "Légierő mentőprogram"], correct: 0, explanation: "Combat Lifesaver = harci életmentő képzés nem-egészségügyi katonáknak, alapszintű sebesültellátási ismeretek.", tags: ["egészségügy", "szintek"]},
+                {id: 24, question: "Mik a hadtáp támogatás főbb területei?", answers: ["Élelmezés, üzemanyag, ruházat", "Csak fegyverjavítás", "Csak szállítás", "Csak egészségügy"], correct: 0, explanation: "A hadtáp támogatás főbb területei: élelmezés, üzemanyag, ruházat, humánanyag, térképészet.", tags: ["logisztika", "hadtáp"]},
+                {id: 25, question: "Mik a logisztika funkcionális területei?", answers: ["Ellátás, üzemben tartás, mozgatás-szállítás", "Csak raktározás", "Csak javítás", "Csak szállítás"], correct: 0, explanation: "A logisztika funkcionális területei: ellátás-tárolás, üzemben tartás (üzemfenntartás, helyreállítás), mozgatás-szállítás.", tags: ["logisztika", "funkciók"]}
+            ]
+        };
+
+        // ==================== SM-2 ALGORITHMS ====================
+        class SM2 {
+            static defaultCard() {
+                return {
+                    easeFactor: 2.5,
+                    interval: 0,
+                    repetitions: 0,
+                    nextReview: Date.now(),
+                    lastReview: null
+                };
+            }
+
+            static calculate(card, quality) {
+                let { easeFactor, interval, repetitions } = card;
+
+                if (quality < 3) {
+                    repetitions = 0;
+                    interval = 1;
+                } else {
+                    if (repetitions === 0) interval = 1;
+                    else if (repetitions === 1) interval = 6;
+                    else interval = Math.round(interval * easeFactor);
+                    repetitions++;
+                }
+
+                easeFactor = Math.max(1.3, easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)));
+                const nextReview = Date.now() + interval * 24 * 60 * 60 * 1000;
+
+                return { easeFactor, interval, repetitions, nextReview, lastReview: Date.now() };
+            }
+
+            static getNextReviewText(interval) {
+                if (interval === 0) return 'Most';
+                if (interval === 1) return '1 nap';
+                if (interval < 7) return `${interval} nap`;
+                if (interval < 30) return `${Math.round(interval / 7)} hét`;
+                return `${Math.round(interval / 30)} hónap`;
+            }
+        }
+
+        class QuizSM2 {
+            static defaultQuestion() {
+                return {
+                    easeFactor: 2.5,
+                    interval: 0,
+                    repetitions: 0,
+                    nextReview: Date.now(),
+                    lastReview: null,
+                    correctCount: 0,
+                    incorrectCount: 0
+                };
+            }
+
+            static calculate(question, isCorrect) {
+                let { easeFactor, interval, repetitions, correctCount, incorrectCount } = question;
+
+                if (isCorrect) {
+                    correctCount++;
+                    if (repetitions === 0) interval = 1;
+                    else if (repetitions === 1) interval = 6;
+                    else interval = Math.round(interval * easeFactor);
+                    repetitions++;
+                    easeFactor = Math.max(1.3, easeFactor + 0.1);
+                } else {
+                    incorrectCount++;
+                    repetitions = 0;
+                    interval = 0;
+                    easeFactor = Math.max(1.3, easeFactor - 0.2);
+                }
+
+                return {
+                    easeFactor, interval, repetitions,
+                    nextReview: Date.now() + interval * 24 * 60 * 60 * 1000,
+                    lastReview: Date.now(),
+                    correctCount, incorrectCount
+                };
+            }
+        }
+
+        // ==================== MAIN APP ====================
+        class LearningApp {
+            constructor() {
+                this.currentScreen = 'topics';
+                this.selectedTopics = new Set();
+                this.selectedMode = null;
+                this.allTopics = this.extractTopics();
+
+                // Flashcard state
+                this.flashcardProgress = {};
+                this.flashcardQueue = [];
+                this.flashcardIndex = 0;
+                this.isFlipped = false;
+                this.flashcardStats = { reviewed: 0, again: 0, hard: 0, good: 0, easy: 0 };
+
+                // Quiz state
+                this.quizProgress = {};
+                this.quizQueue = [];
+                this.quizIndex = 0;
+                this.quizAnswered = false;
+                this.selectedAnswer = null;
+                this.shuffledAnswers = null;
+                this.quizStats = { correct: 0, incorrect: 0, streak: 0, maxStreak: 0 };
+
+                this.loadProgress();
+                this.render();
+                this.bindEvents();
+            }
+
+            extractTopics() {
+                const topicMap = {};
+
+                DATA.cards.forEach(card => {
+                    (card.tags || []).forEach(tag => {
+                        if (!topicMap[tag]) topicMap[tag] = { cards: 0, questions: 0 };
+                        topicMap[tag].cards++;
+                    });
+                });
+
+                DATA.questions.forEach(q => {
+                    (q.tags || []).forEach(tag => {
+                        if (!topicMap[tag]) topicMap[tag] = { cards: 0, questions: 0 };
+                        topicMap[tag].questions++;
+                    });
+                });
+
+                return topicMap;
+            }
+
+            loadProgress() {
+                try {
+                    const fc = localStorage.getItem('flashcards_progress');
+                    this.flashcardProgress = fc ? JSON.parse(fc) : {};
+                    const qz = localStorage.getItem('quiz_progress');
+                    this.quizProgress = qz ? JSON.parse(qz) : {};
+                } catch { }
+            }
+
+            saveFlashcardProgress() {
+                localStorage.setItem('flashcards_progress', JSON.stringify(this.flashcardProgress));
+            }
+
+            saveQuizProgress() {
+                localStorage.setItem('quiz_progress', JSON.stringify(this.quizProgress));
+            }
+
+            toggleTopic(topic) {
+                if (this.selectedTopics.has(topic)) {
+                    this.selectedTopics.delete(topic);
+                } else {
+                    this.selectedTopics.add(topic);
+                }
+                this.render();
+            }
+
+            selectAllTopics() {
+                if (this.selectedTopics.size === Object.keys(this.allTopics).length) {
+                    this.selectedTopics.clear();
+                } else {
+                    this.selectedTopics = new Set(Object.keys(this.allTopics));
+                }
+                this.render();
+            }
+
+            selectMode(mode) {
+                if (this.selectedTopics.size === 0) return;
+                this.selectedMode = mode;
+                this.currentScreen = 'learning';
+                this.initLearning();
+                this.render();
+            }
+
+            goBack() {
+                this.currentScreen = 'topics';
+                this.selectedMode = null;
+                this.resetLearningState();
+                this.render();
+            }
+
+            resetLearningState() {
+                this.flashcardQueue = [];
+                this.flashcardIndex = 0;
+                this.isFlipped = false;
+                this.flashcardStats = { reviewed: 0, again: 0, hard: 0, good: 0, easy: 0 };
+
+                this.quizQueue = [];
+                this.quizIndex = 0;
+                this.quizAnswered = false;
+                this.selectedAnswer = null;
+                this.shuffledAnswers = null;
+                this.quizStats = { correct: 0, incorrect: 0, streak: 0, maxStreak: 0 };
+            }
+
+            initLearning() {
+                this.resetLearningState();
+                const topics = Array.from(this.selectedTopics);
+
+                if (this.selectedMode === 'flashcard') {
+                    const filteredCards = DATA.cards.filter(c =>
+                        (c.tags || []).some(t => topics.includes(t))
+                    );
+
+                    this.flashcardQueue = filteredCards.map(c => ({
+                        ...c,
+                        ...SM2.defaultCard(),
+                        ...(this.flashcardProgress[c.id] || {})
+                    })).filter(c => c.nextReview <= Date.now());
+
+                    this.flashcardQueue.sort((a, b) => {
+                        if (a.repetitions === 0 && b.repetitions > 0) return -1;
+                        if (a.repetitions > 0 && b.repetitions === 0) return 1;
+                        return a.nextReview - b.nextReview;
+                    });
+                } else {
+                    const filteredQuestions = DATA.questions.filter(q =>
+                        (q.tags || []).some(t => topics.includes(t))
+                    );
+
+                    this.quizQueue = filteredQuestions.map(q => ({
+                        ...q,
+                        ...QuizSM2.defaultQuestion(),
+                        ...(this.quizProgress[q.id] || {})
+                    })).filter(q => q.nextReview <= Date.now());
+
+                    this.quizQueue.sort((a, b) => {
+                        if (a.repetitions === 0 && b.repetitions > 0) return -1;
+                        if (a.repetitions > 0 && b.repetitions === 0) return 1;
+                        return a.nextReview - b.nextReview;
+                    });
+                }
+            }
+
+            // Flashcard methods
+            flipCard() {
+                this.isFlipped = !this.isFlipped;
+                this.render();
+            }
+
+            rateCard(quality) {
+                const card = this.flashcardQueue[this.flashcardIndex];
+                if (!card) return;
+
+                const qualityMap = { again: 1, hard: 2, good: 3, easy: 5 };
+                const q = qualityMap[quality];
+
+                Object.assign(card, SM2.calculate(card, q));
+                this.flashcardStats.reviewed++;
+                this.flashcardStats[quality]++;
+
+                this.flashcardProgress[card.id] = {
+                    easeFactor: card.easeFactor,
+                    interval: card.interval,
+                    repetitions: card.repetitions,
+                    nextReview: card.nextReview,
+                    lastReview: card.lastReview
+                };
+                this.saveFlashcardProgress();
+
+                if (quality === 'again') {
+                    this.flashcardQueue.push(card);
+                }
+
+                this.flashcardIndex++;
+                this.isFlipped = false;
+                this.render();
+            }
+
+            getIntervalPreview(quality) {
+                const card = this.flashcardQueue[this.flashcardIndex];
+                if (!card) return '';
+                const qualityMap = { again: 1, hard: 2, good: 3, easy: 5 };
+                const preview = SM2.calculate({...card}, qualityMap[quality]);
+                return SM2.getNextReviewText(preview.interval);
+            }
+
+            // Quiz methods
+            shuffleAnswers(question) {
+                const answers = question.answers.map((answer, index) => ({
+                    text: typeof answer === 'object' ? answer.text : answer,
+                    isCorrect: index === question.correct
+                }));
+                for (let i = answers.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [answers[i], answers[j]] = [answers[j], answers[i]];
+                }
+                return answers;
+            }
+
+            selectQuizAnswer(index) {
+                if (this.quizAnswered) return;
+
+                this.quizAnswered = true;
+                this.selectedAnswer = index;
+
+                const question = this.quizQueue[this.quizIndex];
+                const isCorrect = this.shuffledAnswers[index].isCorrect;
+
+                if (isCorrect) {
+                    this.quizStats.correct++;
+                    this.quizStats.streak++;
+                    this.quizStats.maxStreak = Math.max(this.quizStats.maxStreak, this.quizStats.streak);
+                } else {
+                    this.quizStats.incorrect++;
+                    this.quizStats.streak = 0;
+                }
+
+                Object.assign(question, QuizSM2.calculate(question, isCorrect));
+
+                if (!isCorrect) {
+                    this.quizQueue.push(question);
+                }
+
+                this.quizProgress[question.id] = {
+                    easeFactor: question.easeFactor,
+                    interval: question.interval,
+                    repetitions: question.repetitions,
+                    nextReview: question.nextReview,
+                    lastReview: question.lastReview,
+                    correctCount: question.correctCount,
+                    incorrectCount: question.incorrectCount
+                };
+                this.saveQuizProgress();
+                this.render();
+            }
+
+            nextQuestion() {
+                if (!this.quizAnswered) return;
+                this.quizIndex++;
+                this.quizAnswered = false;
+                this.selectedAnswer = null;
+                this.shuffledAnswers = null;
+                this.render();
+            }
+
+            resetProgress() {
+                if (!confirm('Biztosan törölni szeretnéd az összes haladási adatot?')) return;
+
+                if (this.selectedMode === 'flashcard') {
+                    localStorage.removeItem('flashcards_progress');
+                    this.flashcardProgress = {};
+                } else {
+                    localStorage.removeItem('quiz_progress');
+                    this.quizProgress = {};
+                }
+
+                this.initLearning();
+                this.render();
+            }
+
+            // Render
+            render() {
+                const app = document.getElementById('app');
+
+                if (this.currentScreen === 'topics') {
+                    app.innerHTML = this.renderTopicsScreen();
+                } else {
+                    app.innerHTML = this.renderLearningScreen();
+                }
+            }
+
+            renderTopicsScreen() {
+                const topics = Object.entries(this.allTopics);
+                const allSelected = this.selectedTopics.size === topics.length;
+
+                return `
+                    <h3 class="section-title">Válassz témakör(öke)t</h3>
+
+                    <button class="select-all-btn" onclick="app.selectAllTopics()">
+                        ${allSelected ? 'Összes törlése' : 'Összes kiválasztása'}
+                    </button>
+
+                    <div class="topics-grid">
+                        ${topics.map(([topic, counts]) => `
+                            <div class="topic-card ${this.selectedTopics.has(topic) ? 'selected' : ''}"
+                                 onclick="app.toggleTopic('${topic}')">
+                                <div class="topic-name">${topic}</div>
+                                <div class="topic-count">${counts.cards} kártya, ${counts.questions} kérdés</div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <p class="selected-info">
+                        ${this.selectedTopics.size > 0
+                            ? `${this.selectedTopics.size} témakör kiválasztva`
+                            : 'Válassz legalább egy témakört a folytatáshoz'}
+                    </p>
+
+                    <h3 class="section-title">Válassz tanulási módot</h3>
+
+                    <div class="mode-selection">
+                        <div class="mode-card quiz" onclick="app.selectMode('quiz')">
+                            <div class="mode-icon">?</div>
+                            <div class="mode-title">Kvíz</div>
+                            <div class="mode-desc">Teszteld tudásod feleletválasztós kérdésekkel</div>
+                        </div>
+                        <div class="mode-card flashcard" onclick="app.selectMode('flashcard')">
+                            <div class="mode-icon">&#x1F4C4;</div>
+                            <div class="mode-title">Tanulókártyák</div>
+                            <div class="mode-desc">Tanulj kártyákkal, Spaced Repetition rendszerrel</div>
+                        </div>
+                    </div>
+
+                    <button class="start-btn" onclick="app.selectMode('quiz')" ${this.selectedTopics.size === 0 ? 'disabled' : ''}>
+                        Indítás
+                    </button>
+                `;
+            }
+
+            renderLearningScreen() {
+                if (this.selectedMode === 'flashcard') {
+                    return this.renderFlashcardScreen();
+                } else {
+                    return this.renderQuizScreen();
+                }
+            }
+
+            renderFlashcardScreen() {
+                const card = this.flashcardQueue[this.flashcardIndex];
+                const progress = this.flashcardIndex / Math.max(1, this.flashcardQueue.length) * 100;
+
+                if (!card) {
+                    return this.renderSessionComplete('flashcard');
+                }
+
+                return `
+                    <button class="back-btn" onclick="app.goBack()">← Vissza</button>
+
+                    <div class="stats-bar">
+                        <div class="stat-item">
+                            <div class="stat-value" style="color: #00d9ff">${this.flashcardQueue.length - this.flashcardIndex}</div>
+                            <div class="stat-label">Hátralévő</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" style="color: #00ff88">${this.flashcardStats.good + this.flashcardStats.easy}</div>
+                            <div class="stat-label">Sikeres</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" style="color: #e74c3c">${this.flashcardStats.again}</div>
+                            <div class="stat-label">Újra</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${this.flashcardStats.reviewed}</div>
+                            <div class="stat-label">Átnézett</div>
+                        </div>
+                    </div>
+
+                    <div class="progress-container">
+                        <div class="progress-bar flashcard" style="width: ${progress}%"></div>
+                    </div>
+
+                    <div class="card-container" onclick="app.flipCard()">
+                        <div class="flashcard ${this.isFlipped ? 'flipped' : ''}">
+                            <div class="card-face card-front">
+                                <div class="card-number">${this.flashcardIndex + 1} / ${this.flashcardQueue.length}</div>
+                                <div class="card-tags">
+                                    ${(card.tags || []).map(t => `<span class="tag">${t}</span>`).join('')}
+                                </div>
+                                <div class="card-content">${card.front}</div>
+                                <div class="card-hint">Kattints a megfordításhoz</div>
+                            </div>
+                            <div class="card-face card-back">
+                                <div class="card-number">${this.flashcardIndex + 1} / ${this.flashcardQueue.length}</div>
+                                <div class="card-content">${card.back}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="rating-buttons ${this.isFlipped ? 'visible' : ''}">
+                        <button class="rating-btn again" onclick="event.stopPropagation(); app.rateCard('again')">
+                            Újra
+                            <span class="next-review">${this.getIntervalPreview('again')}</span>
+                        </button>
+                        <button class="rating-btn hard" onclick="event.stopPropagation(); app.rateCard('hard')">
+                            Nehéz
+                            <span class="next-review">${this.getIntervalPreview('hard')}</span>
+                        </button>
+                        <button class="rating-btn good" onclick="event.stopPropagation(); app.rateCard('good')">
+                            Jó
+                            <span class="next-review">${this.getIntervalPreview('good')}</span>
+                        </button>
+                        <button class="rating-btn easy" onclick="event.stopPropagation(); app.rateCard('easy')">
+                            Könnyű
+                            <span class="next-review">${this.getIntervalPreview('easy')}</span>
+                        </button>
+                    </div>
+
+                    <div class="shortcuts">
+                        <h4>Billentyűparancsok</h4>
+                        <div class="shortcut-list">
+                            <div class="shortcut"><span class="key">Space</span> Megfordítás</div>
+                            <div class="shortcut"><span class="key">1</span> Újra</div>
+                            <div class="shortcut"><span class="key">2</span> Nehéz</div>
+                            <div class="shortcut"><span class="key">3</span> Jó</div>
+                            <div class="shortcut"><span class="key">4</span> Könnyű</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderQuizScreen() {
+                const question = this.quizQueue[this.quizIndex];
+                const progress = this.quizIndex / Math.max(1, this.quizQueue.length) * 100;
+
+                if (!question) {
+                    return this.renderSessionComplete('quiz');
+                }
+
+                if (!this.shuffledAnswers) {
+                    this.shuffledAnswers = this.shuffleAnswers(question);
+                }
+
+                const keys = ['A', 'B', 'C', 'D'];
+                const answersHtml = this.shuffledAnswers.map((answer, i) => {
+                    let classes = 'answer-btn';
+                    if (this.quizAnswered) {
+                        if (answer.isCorrect) {
+                            classes += i === this.selectedAnswer ? ' correct' : ' show-correct';
+                        } else if (i === this.selectedAnswer) {
+                            classes += ' incorrect';
+                        }
+                    }
+                    return `
+                        <button class="${classes}" onclick="app.selectQuizAnswer(${i})" ${this.quizAnswered ? 'disabled' : ''}>
+                            <span class="answer-key">${keys[i]}</span>
+                            ${answer.text}
+                        </button>
+                    `;
+                }).join('');
+
+                const isCorrect = this.quizAnswered && this.shuffledAnswers[this.selectedAnswer]?.isCorrect;
+
+                return `
+                    <button class="back-btn" onclick="app.goBack()">← Vissza</button>
+
+                    <div class="stats-bar">
+                        <div class="stat-item">
+                            <div class="stat-value" style="color: #00ff88">${this.quizStats.correct}</div>
+                            <div class="stat-label">Helyes</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" style="color: #ff6b6b">${this.quizStats.incorrect}</div>
+                            <div class="stat-label">Hibás</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" style="color: #feca57">${this.quizStats.streak}</div>
+                            <div class="stat-label">Sorozat</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${this.quizQueue.length - this.quizIndex}</div>
+                            <div class="stat-label">Hátralévő</div>
+                        </div>
+                    </div>
+
+                    <div class="progress-container">
+                        <div class="progress-bar quiz" style="width: ${progress}%"></div>
+                    </div>
+
+                    <div class="question-card">
+                        <div class="question-number">Kérdés ${this.quizIndex + 1} / ${this.quizQueue.length}</div>
+                        <div class="question-text">${question.question}</div>
+                        <div class="question-tags">
+                            ${(question.tags || []).map(t => `<span class="tag">${t}</span>`).join('')}
+                        </div>
+                    </div>
+
+                    <div class="answers-container">
+                        ${answersHtml}
+                    </div>
+
+                    <div class="feedback ${this.quizAnswered ? 'visible' : ''} ${isCorrect ? 'correct' : 'incorrect'}">
+                        <div class="feedback-icon">${isCorrect ? '✓' : '✗'}</div>
+                        <div class="feedback-text">${isCorrect ? 'Helyes válasz!' : 'Sajnos nem jó.'}</div>
+                        <div class="feedback-explanation">${question.explanation || ''}</div>
+                    </div>
+
+                    <button class="next-btn ${this.quizAnswered ? 'visible' : ''}" onclick="app.nextQuestion()">
+                        Következő kérdés →
+                    </button>
+
+                    <div class="shortcuts">
+                        <h4>Billentyűparancsok</h4>
+                        <div class="shortcut-list">
+                            <div class="shortcut"><span class="key">1-4</span> Válasz</div>
+                            <div class="shortcut"><span class="key">Enter</span> Következő</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderSessionComplete(mode) {
+                const stats = mode === 'flashcard' ? this.flashcardStats : this.quizStats;
+                const total = mode === 'flashcard'
+                    ? stats.reviewed
+                    : stats.correct + stats.incorrect;
+                const success = mode === 'flashcard'
+                    ? stats.good + stats.easy
+                    : stats.correct;
+                const scorePercent = total > 0 ? Math.round(success / total * 100) : 0;
+
+                return `
+                    <button class="back-btn" onclick="app.goBack()">← Vissza a témákhoz</button>
+
+                    <div class="session-complete">
+                        <h2>Gratulálok!</h2>
+                        <p>Minden esedékes ${mode === 'flashcard' ? 'kártyát' : 'kérdést'} átnéztél.</p>
+
+                        <div class="score-circle" style="--score: ${scorePercent * 3.6}deg">
+                            <span class="score-value">${scorePercent}%</span>
+                        </div>
+
+                        <div class="session-stats">
+                            <div class="session-stat">
+                                <div class="session-stat-value" style="color: #00ff88">${success}</div>
+                                <div class="session-stat-label">Sikeres</div>
+                            </div>
+                            <div class="session-stat">
+                                <div class="session-stat-value" style="color: #ff6b6b">${mode === 'flashcard' ? stats.again : stats.incorrect}</div>
+                                <div class="session-stat-label">${mode === 'flashcard' ? 'Újra' : 'Hibás'}</div>
+                            </div>
+                            <div class="session-stat">
+                                <div class="session-stat-value">${total}</div>
+                                <div class="session-stat-label">Összesen</div>
+                            </div>
+                        </div>
+
+                        <div class="controls">
+                            <button class="control-btn" onclick="app.initLearning(); app.render();">
+                                Frissítés
+                            </button>
+                            <button class="control-btn" onclick="app.resetProgress()">
+                                Haladás törlése
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            bindEvents() {
+                document.addEventListener('keydown', (e) => {
+                    if (e.target.tagName === 'INPUT') return;
+
+                    if (this.currentScreen === 'learning') {
+                        if (this.selectedMode === 'flashcard') {
+                            switch(e.key) {
+                                case ' ':
+                                    e.preventDefault();
+                                    this.flipCard();
+                                    break;
+                                case '1':
+                                    if (this.isFlipped) this.rateCard('again');
+                                    break;
+                                case '2':
+                                    if (this.isFlipped) this.rateCard('hard');
+                                    break;
+                                case '3':
+                                    if (this.isFlipped) this.rateCard('good');
+                                    break;
+                                case '4':
+                                    if (this.isFlipped) this.rateCard('easy');
+                                    break;
+                                case 'Escape':
+                                    this.goBack();
+                                    break;
+                            }
+                        } else {
+                            switch(e.key) {
+                                case '1':
+                                    if (!this.quizAnswered) this.selectQuizAnswer(0);
+                                    break;
+                                case '2':
+                                    if (!this.quizAnswered) this.selectQuizAnswer(1);
+                                    break;
+                                case '3':
+                                    if (!this.quizAnswered) this.selectQuizAnswer(2);
+                                    break;
+                                case '4':
+                                    if (!this.quizAnswered) this.selectQuizAnswer(3);
+                                    break;
+                                case 'Enter':
+                                    if (this.quizAnswered) this.nextQuestion();
+                                    break;
+                                case 'Escape':
+                                    this.goBack();
+                                    break;
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Initialize
+        const app = new LearningApp();
+    </script>
+</body>
+</html>
