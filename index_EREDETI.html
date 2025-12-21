@@ -1099,6 +1099,14 @@
             box-shadow: 0 5px 20px rgba(0,255,136,0.3);
         }
 
+        .ai-search-submit .btn-text {
+            display: inline;
+        }
+
+        .ai-search-submit .btn-icon {
+            display: none;
+        }
+
         .ai-search-submit:disabled {
             background: #444;
             color: #888;
@@ -1799,6 +1807,30 @@
             background: rgba(255,255,255,0.2);
         }
 
+        .modal-footer {
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 30px;
+        }
+
+        .modal-close-btn {
+            background: linear-gradient(145deg, #ff6b6b, #cc5555);
+            border: none;
+            color: #fff;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(255,107,107,0.3);
+        }
+
         /* Markdown content styles */
         .markdown-content {
             color: #e0e0e0;
@@ -2086,6 +2118,38 @@
                 height: 32px;
                 font-size: 1rem;
             }
+
+            /* AI search mobile */
+            .ai-search-input-wrapper {
+                gap: 6px;
+            }
+
+            .ai-search-input-wrapper input {
+                padding: 10px 12px;
+                font-size: 0.9rem;
+            }
+
+            .ai-camera-btn {
+                padding: 8px 10px;
+                font-size: 1rem;
+            }
+
+            .ai-search-submit {
+                padding: 10px 12px;
+            }
+
+            .ai-search-submit .btn-text {
+                display: none;
+            }
+
+            .ai-search-submit .btn-icon {
+                display: inline;
+                font-size: 1.1rem;
+            }
+
+            .ai-search-title {
+                font-size: 0.95rem;
+            }
         }
 
         @media (max-width: 400px) {
@@ -2154,7 +2218,7 @@
             <div class="ai-search-input-wrapper">
                 <input type="text" id="aiSearchInput" placeholder="Pl.: Mi a harckocsi három fő összetevője?" onkeypress="if(event.key==='Enter')app.performAiSearch()">
                 <button class="ai-camera-btn" onclick="app.openCamera()" title="Kérdés beolvasása kamerával">📷</button>
-                <button class="ai-search-submit" onclick="app.performAiSearch()">Keresés</button>
+                <button class="ai-search-submit" onclick="app.performAiSearch()"><span class="btn-text">Keresés</span><span class="btn-icon">🔍</span></button>
             </div>
             <div id="aiSearchStatus" class="ai-search-status"></div>
             <div id="aiSearchResults" class="ai-search-results"></div>
@@ -2264,6 +2328,9 @@
                 <button onclick="app.navigateSearch(1)" title="Következő">▼</button>
             </div>
             <div id="kivonatContent" class="markdown-content"></div>
+            <div class="modal-footer">
+                <button class="modal-close-btn" onclick="app.closeMarkdown()">✕ Bezárás</button>
+            </div>
         </div>
     </div>
 
