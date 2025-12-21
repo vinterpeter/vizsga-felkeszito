@@ -2286,7 +2286,7 @@
             <div class="offline-panel-content">
                 <div class="offline-panel-header">
                     <span class="offline-panel-title">📥 Offline mód</span>
-                    <span class="offline-version" id="offlineVersion">v1.3.0</span>
+                    <span class="offline-version" id="offlineVersion">v1.3.1</span>
                     <button class="offline-panel-close" onclick="app.toggleOfflinePanel()">&times;</button>
                 </div>
                 <div class="offline-status" id="offlineStatus">
@@ -4477,9 +4477,24 @@
                         return { ...item, similarity, index };
                     });
 
-                    // Sort by similarity and get top 5
-                    similarities.sort((a, b) => b.similarity - a.similarity);
-                    const topResults = similarities.slice(0, 5);
+                    // Separate by type and get top 3 from each
+                    const quizResults = similarities
+                        .filter(item => item.type === 'quiz')
+                        .sort((a, b) => b.similarity - a.similarity)
+                        .slice(0, 3);
+
+                    const flashcardResults = similarities
+                        .filter(item => item.type === 'flashcard')
+                        .sort((a, b) => b.similarity - a.similarity)
+                        .slice(0, 3);
+
+                    const markdownResults = similarities
+                        .filter(item => item.type === 'markdown')
+                        .sort((a, b) => b.similarity - a.similarity)
+                        .slice(0, 3);
+
+                    // Combine all results (3 quiz + 3 flashcard + 3 markdown = 9 total)
+                    const topResults = [...quizResults, ...flashcardResults, ...markdownResults];
 
                     // Display results
                     this.displayAiResults(topResults);
@@ -4794,7 +4809,7 @@
                     navigator.serviceWorker.controller.postMessage({ type: 'GET_CACHE_SIZE' });
                 } else {
                     // SW not ready yet, check status with default version
-                    this.currentSwVersion = '1.3.0';
+                    this.currentSwVersion = '1.3.1';
                     this.checkVersionStatus();
                 }
             }
@@ -5023,7 +5038,7 @@
             }
 
             async cacheUrlsDirect(urls) {
-                const version = this.currentSwVersion || '1.3.0';
+                const version = this.currentSwVersion || '1.3.1';
                 const cache = await caches.open(`vizsga-media-v${version}`);
                 let completed = 0;
                 const total = urls.length;
@@ -5066,7 +5081,7 @@
                 progressContainer.style.display = 'none';
 
                 // Save offline status with version (use fallback if not set)
-                const version = this.currentSwVersion || '1.3.0';
+                const version = this.currentSwVersion || '1.3.1';
                 localStorage.setItem('vizsga_cachedVersion', version);
                 localStorage.setItem('vizsga_lastSync', Date.now().toString());
 
