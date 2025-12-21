@@ -1510,6 +1510,15 @@
             color: #00d9ff;
         }
 
+        .offline-version {
+            font-size: 0.7rem;
+            background: rgba(0,217,255,0.2);
+            color: #00d9ff;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+        }
+
         .offline-panel-close {
             background: none;
             border: none;
@@ -2250,6 +2259,7 @@
             <div class="offline-panel-content">
                 <div class="offline-panel-header">
                     <span class="offline-panel-title">📥 Offline mód</span>
+                    <span class="offline-version" id="offlineVersion">v1.1.0</span>
                     <button class="offline-panel-close" onclick="app.toggleOfflinePanel()">&times;</button>
                 </div>
                 <div class="offline-status" id="offlineStatus">
@@ -2280,6 +2290,10 @@
                     <label class="offline-option">
                         <input type="checkbox" id="offlineIncludeMedia" checked>
                         <span>Média letöltése (podcast, videó, PDF) - ~500MB</span>
+                    </label>
+                    <label class="offline-option">
+                        <input type="checkbox" id="offlineIncludeAI" checked>
+                        <span>AI modell letöltése (offline AI kereső) - ~50MB</span>
                     </label>
                 </div>
                 <div class="offline-actions">
@@ -4810,6 +4824,7 @@
                 if (this.isDownloading) return;
 
                 const includeMedia = document.getElementById('offlineIncludeMedia').checked;
+                const includeAI = document.getElementById('offlineIncludeAI').checked;
                 const downloadBtn = document.getElementById('offlineDownloadBtn');
                 const progressContainer = document.getElementById('offlineProgressContainer');
                 const statusIcon = document.getElementById('offlineStatusIcon');
@@ -4835,6 +4850,19 @@
 
                 // Embeddings if exists
                 urlsToCache.push('./embeddings.json');
+
+                // AI model files for offline AI search
+                if (includeAI) {
+                    const modelBase = 'https://huggingface.co/Xenova/paraphrase-multilingual-MiniLM-L12-v2/resolve/main';
+                    urlsToCache.push(
+                        `${modelBase}/config.json`,
+                        `${modelBase}/tokenizer.json`,
+                        `${modelBase}/tokenizer_config.json`,
+                        `${modelBase}/onnx/model_quantized.onnx`
+                    );
+                    // Transformers.js library
+                    urlsToCache.push('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
+                }
 
                 // Media files for each chapter
                 const chapters = ['02', '03', '04', '05', '06', '07', '08'];
