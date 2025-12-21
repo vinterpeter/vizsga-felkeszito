@@ -816,6 +816,165 @@
             padding: 20px;
         }
 
+        /* Kivonat Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.visible {
+            display: block;
+        }
+
+        .modal-content {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #1e1e3a;
+            border-radius: 15px;
+            position: relative;
+        }
+
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.3rem;
+            color: #00d9ff;
+        }
+
+        .modal-header .modal-close {
+            position: static;
+        }
+
+        .modal-close {
+            position: sticky;
+            top: 0;
+            float: right;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #fff;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .modal-close:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Markdown content styles */
+        .markdown-content {
+            color: #e0e0e0;
+            line-height: 1.7;
+        }
+
+        .markdown-content h1 {
+            color: #00d9ff;
+            font-size: 1.6rem;
+            margin: 20px 0 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+        }
+
+        .markdown-content h2 {
+            color: #00ff88;
+            font-size: 1.3rem;
+            margin: 25px 0 12px;
+        }
+
+        .markdown-content h3 {
+            color: #feca57;
+            font-size: 1.1rem;
+            margin: 20px 0 10px;
+        }
+
+        .markdown-content p {
+            margin: 10px 0;
+        }
+
+        .markdown-content ul, .markdown-content ol {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+
+        .markdown-content li {
+            margin: 5px 0;
+        }
+
+        .markdown-content blockquote {
+            border-left: 3px solid #00d9ff;
+            padding-left: 15px;
+            margin: 15px 0;
+            color: #aaa;
+            font-style: italic;
+        }
+
+        .markdown-content code {
+            background: rgba(255,255,255,0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        .markdown-content pre {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        .markdown-content pre code {
+            background: none;
+            padding: 0;
+        }
+
+        .markdown-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        .markdown-content th, .markdown-content td {
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        .markdown-content th {
+            background: rgba(255,255,255,0.05);
+            color: #00d9ff;
+        }
+
+        .markdown-content hr {
+            border: none;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin: 20px 0;
+        }
+
+        .markdown-content strong {
+            color: #fff;
+        }
+
         /* Responsive */
         @media (max-width: 600px) {
             .container {
@@ -880,6 +1039,8 @@
             }
         }
     </style>
+    <!-- Markdown parser -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -896,54 +1057,75 @@
         </div>
     </div>
 
+    <!-- Kivonat Modal -->
+    <div id="kivonatModal" class="modal-overlay" onclick="app.closeMarkdown(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 id="kivonatTitle"></h2>
+                <button class="modal-close" onclick="app.closeMarkdown()">&times;</button>
+            </div>
+            <div id="kivonatContent" class="markdown-content"></div>
+        </div>
+    </div>
+
     <script>
-        // ==================== MEDIA DATA ====================
+        
+                
+                        // ==================== MEDIA DATA ====================
         const MEDIA = {
             "Vezetéselmélet": {
                 id: "02",
                 podcast: "media/02/podcast.m4a",
                 video: "media/02/video.mp4",
                 diasor: "media/02/diasor.pdf",
-                kivonat: "media/02/kivonat.pdf"
+                kivonat: "media/02/kivonat.md",
+                teljes: "media/02/teljes.md"
             },
             "Harcászat": {
                 id: "03",
                 podcast: "media/03/podcast.m4a",
                 video: "media/03/video.mp4",
                 diasor: "media/03/diasor.pdf",
-                kivonat: "media/03/kivonat.pdf"
+                kivonat: "media/03/kivonat.md",
+                teljes: "media/03/teljes.md"
             },
             "Törzsszolgálati ismeretek": {
                 id: "04",
                 podcast: "media/04/podcast.m4a",
                 video: "media/04/video.mp4",
                 diasor: "media/04/diasor.pdf",
-                kivonat: "media/04/kivonat.pdf"
+                kivonat: "media/04/kivonat.md",
+                teljes: "media/04/teljes.md"
             },
             "Harci támogatás": {
                 id: "05",
                 podcast: "media/05/podcast.m4a",
                 video: "media/05/video.mp4",
                 diasor: "media/05/diasor.pdf",
-                kivonat: "media/05/kivonat.pdf"
+                kivonat: "media/05/kivonat.md",
+                teljes: "media/05/teljes.md"
             },
             "Harci kiszolgáló támogatás": {
                 id: "06",
                 podcast: "media/06/podcast.m4a",
                 video: "media/06/video.mp4",
                 diasor: "media/06/diasor.pdf",
-                kivonat: "media/06/kivonat.pdf"
+                kivonat: "media/06/kivonat.md",
+                teljes: "media/06/teljes.md"
             },
             "Katonai tereptan": {
                 id: "07",
                 podcast: "media/07/podcast.m4a",
                 video: "media/07/video.mp4",
                 diasor: "media/07/diasor.pdf",
-                kivonat: "media/07/kivonat.pdf"
+                kivonat: "media/07/kivonat.md",
+                teljes: "media/07/teljes.md"
             },
             "MH haditechnikai eszközei": {
                 id: "08",
-                podcast: "media/08/podcast.m4a"
+                podcast: "media/08/podcast.m4a",
+                kivonat: "media/08/kivonat.md",
+                teljes: "media/08/teljes.md"
             }
         };
 
@@ -1209,8 +1391,8 @@
                 this.currentScreen = 'learning';
 
                 if (mode === 'materials') {
-                    // Set first selected topic as current chapter
-                    this.currentChapter = Array.from(this.selectedTopics)[0];
+                    // Use the main chapter name for materials (matches MEDIA keys)
+                    this.currentChapter = "Harci kiszolgáló támogatás";
                 } else {
                     this.initLearning();
                 }
@@ -1525,10 +1707,16 @@
                                         </a>
                                     ` : ''}
                                     ${media.kivonat ? `
-                                        <a href="${media.kivonat}" target="_blank" class="material-link">
-                                            <span class="material-link-icon">📄</span>
-                                            Kivonat (PDF)
-                                        </a>
+                                        <button onclick="app.openMarkdown('kivonat')" class="material-link">
+                                            <span class="material-link-icon">📝</span>
+                                            Kivonat
+                                        </button>
+                                    ` : ''}
+                                    ${media.teljes ? `
+                                        <button onclick="app.openMarkdown('teljes')" class="material-link">
+                                            <span class="material-link-icon">📖</span>
+                                            Teljes szöveg
+                                        </button>
                                     ` : ''}
                                 </div>
                             </div>
@@ -1813,6 +2001,34 @@
                         }
                     }
                 });
+            }
+
+            async openMarkdown(type) {
+                const media = MEDIA[this.currentChapter];
+                const path = type === 'kivonat' ? media.kivonat : media.teljes;
+                const title = type === 'kivonat' ? 'Kivonat' : 'Teljes szöveg';
+
+                if (path) {
+                    document.getElementById('kivonatTitle').textContent = this.currentChapter + ' - ' + title;
+                    document.getElementById('kivonatContent').innerHTML = '<p style="text-align:center">Betöltés...</p>';
+                    document.getElementById('kivonatModal').classList.add('visible');
+                    document.body.style.overflow = 'hidden';
+
+                    try {
+                        const response = await fetch(path);
+                        const content = await response.text();
+                        document.getElementById('kivonatContent').innerHTML = marked.parse(content);
+                    } catch (err) {
+                        document.getElementById('kivonatContent').innerHTML = '<p style="color:#e74c3c">Hiba a betöltéskor.</p>';
+                    }
+                }
+            }
+
+            closeMarkdown(event) {
+                if (!event || event.target === event.currentTarget) {
+                    document.getElementById('kivonatModal').classList.remove('visible');
+                    document.body.style.overflow = '';
+                }
             }
         }
 
