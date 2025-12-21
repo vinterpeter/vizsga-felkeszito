@@ -816,131 +816,6 @@
             padding: 20px;
         }
 
-        /* Global Search */
-        .global-search-container {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 30px;
-        }
-
-        .global-search-input-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .global-search-input-wrapper input {
-            flex: 1;
-            padding: 14px 20px;
-            padding-right: 50px;
-            font-size: 1rem;
-            background: rgba(0,0,0,0.3);
-            border: 2px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            color: #fff;
-            transition: all 0.3s ease;
-        }
-
-        .global-search-input-wrapper input:focus {
-            outline: none;
-            border-color: #00d9ff;
-            box-shadow: 0 0 15px rgba(0,217,255,0.2);
-        }
-
-        .global-search-input-wrapper input::placeholder {
-            color: #666;
-        }
-
-        .global-search-input-wrapper .search-spinner {
-            position: absolute;
-            right: 15px;
-            font-size: 1.2rem;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .global-search-results {
-            margin-top: 15px;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .global-search-results:empty {
-            display: none;
-        }
-
-        .search-result-item {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .search-result-item:hover {
-            background: rgba(0,217,255,0.1);
-            border-color: rgba(0,217,255,0.3);
-            transform: translateX(5px);
-        }
-
-        .search-result-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .search-result-title {
-            font-weight: 600;
-            color: #00d9ff;
-            font-size: 1rem;
-        }
-
-        .search-result-count {
-            background: rgba(0,217,255,0.2);
-            color: #00d9ff;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .search-result-snippets {
-            font-size: 0.85rem;
-            color: #aaa;
-            line-height: 1.5;
-        }
-
-        .search-result-snippet {
-            background: rgba(0,0,0,0.2);
-            padding: 8px 12px;
-            border-radius: 6px;
-            margin-top: 8px;
-            border-left: 3px solid #00d9ff;
-        }
-
-        .search-result-snippet mark {
-            background: rgba(0,255,136,0.3);
-            color: #00ff88;
-            padding: 1px 3px;
-            border-radius: 3px;
-        }
-
-        .global-search-no-results {
-            text-align: center;
-            color: #666;
-            padding: 20px;
-            font-style: italic;
-        }
-
         /* Kivonat Modal */
         .modal-overlay {
             display: none;
@@ -985,70 +860,6 @@
 
         .modal-header .modal-close {
             position: static;
-        }
-
-        .modal-search-bar {
-            position: sticky;
-            top: 0;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            padding: 10px 15px;
-            margin: -20px -25px 15px -25px;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            z-index: 100;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .modal-search-bar input {
-            flex: 1;
-            padding: 8px 12px;
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 20px;
-            background: rgba(255,255,255,0.1);
-            color: #fff;
-            font-size: 0.9rem;
-        }
-
-        .modal-search-bar input::placeholder {
-            color: rgba(255,255,255,0.5);
-        }
-
-        .modal-search-bar input:focus {
-            outline: none;
-            border-color: #00d9ff;
-            box-shadow: 0 0 10px rgba(0,217,255,0.3);
-        }
-
-        .modal-search-bar span {
-            color: rgba(255,255,255,0.7);
-            font-size: 0.8rem;
-            white-space: nowrap;
-        }
-
-        .modal-search-bar button {
-            background: rgba(255,255,255,0.1);
-            border: none;
-            color: #fff;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-
-        .modal-search-bar button:hover {
-            background: rgba(0,217,255,0.3);
-        }
-
-        .search-highlight {
-            background: rgba(255,255,0,0.4);
-            padding: 1px 0;
-            border-radius: 2px;
-        }
-
-        .search-highlight.current {
-            background: rgba(255,165,0,0.7);
         }
 
         .modal-close {
@@ -1162,22 +973,6 @@
 
         .markdown-content strong {
             color: #fff;
-        }
-
-        .markdown-content a {
-            color: #00d9ff;
-            text-decoration: none;
-            border-bottom: 1px solid rgba(0,217,255,0.3);
-            transition: all 0.2s ease;
-        }
-
-        .markdown-content a:hover {
-            color: #00ff88;
-            border-bottom-color: #00ff88;
-        }
-
-        .markdown-content a:visited {
-            color: #a78bfa;
         }
 
         .markdown-content img {
@@ -1362,15 +1157,6 @@
             <p class="subtitle" id="subtitle">Harci Kiszolgáló Támogatás - Vizsgafelkészítő</p>
         </header>
 
-        <!-- Global Search -->
-        <div id="globalSearchContainer" class="global-search-container">
-            <div class="global-search-input-wrapper">
-                <input type="text" id="globalSearchInput" placeholder="Keresés az összes anyagban..." oninput="app.debounceGlobalSearch(this.value)">
-                <span id="globalSearchSpinner" class="search-spinner" style="display:none;">⏳</span>
-            </div>
-            <div id="globalSearchResults" class="global-search-results"></div>
-        </div>
-
         <div id="app">
             <div class="loading">
                 <div class="spinner"></div>
@@ -1385,12 +1171,6 @@
             <div class="modal-header">
                 <h2 id="kivonatTitle"></h2>
                 <button class="modal-close" onclick="app.closeMarkdown()">&times;</button>
-            </div>
-            <div class="modal-search-bar">
-                <input type="text" id="markdownSearch" placeholder="Keresés az anyagban..." oninput="app.searchMarkdown(this.value)">
-                <span id="searchResults"></span>
-                <button onclick="app.navigateSearch(-1)" title="Előző">▲</button>
-                <button onclick="app.navigateSearch(1)" title="Következő">▼</button>
             </div>
             <div id="kivonatContent" class="markdown-content"></div>
         </div>
@@ -3228,13 +3008,6 @@
                 const title = type === 'kivonat' ? 'Kivonat' : 'Teljes szöveg';
 
                 if (path) {
-                    // Reset search state
-                    document.getElementById('markdownSearch').value = '';
-                    document.getElementById('searchResults').textContent = '';
-                    this.searchMatches = [];
-                    this.currentSearchIndex = 0;
-                    this.originalContent = '';
-
                     document.getElementById('kivonatTitle').textContent = this.currentChapter + ' - ' + title;
                     document.getElementById('kivonatContent').innerHTML = '<p style="text-align:center">Betöltés...</p>';
                     document.getElementById('kivonatModal').classList.add('visible');
@@ -3293,203 +3066,7 @@
                 if (!event || event.target === event.currentTarget) {
                     document.getElementById('kivonatModal').classList.remove('visible');
                     document.body.style.overflow = '';
-                    // Clear search
-                    document.getElementById('markdownSearch').value = '';
-                    document.getElementById('searchResults').textContent = '';
-                    this.searchMatches = [];
-                    this.currentSearchIndex = 0;
                 }
-            }
-
-            // Search functionality for markdown content
-            searchMatches = [];
-            currentSearchIndex = 0;
-            originalContent = '';
-
-            searchMarkdown(query) {
-                const content = document.getElementById('kivonatContent');
-
-                // Restore original content if exists
-                if (this.originalContent) {
-                    content.innerHTML = this.originalContent;
-                } else {
-                    this.originalContent = content.innerHTML;
-                }
-
-                if (!query || query.length < 2) {
-                    document.getElementById('searchResults').textContent = '';
-                    this.searchMatches = [];
-                    return;
-                }
-
-                // Find all text nodes and highlight matches
-                const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-                const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, null, false);
-                const textNodes = [];
-
-                while (walker.nextNode()) {
-                    if (walker.currentNode.textContent.match(regex)) {
-                        textNodes.push(walker.currentNode);
-                    }
-                }
-
-                this.searchMatches = [];
-                textNodes.forEach(node => {
-                    const span = document.createElement('span');
-                    span.innerHTML = node.textContent.replace(regex, '<mark class="search-highlight">$1</mark>');
-                    node.parentNode.replaceChild(span, node);
-                });
-
-                this.searchMatches = content.querySelectorAll('.search-highlight');
-                this.currentSearchIndex = 0;
-
-                if (this.searchMatches.length > 0) {
-                    document.getElementById('searchResults').textContent = `1 / ${this.searchMatches.length}`;
-                    this.searchMatches[0].classList.add('current');
-                    this.searchMatches[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
-                } else {
-                    document.getElementById('searchResults').textContent = '0 találat';
-                }
-            }
-
-            navigateSearch(direction) {
-                if (this.searchMatches.length === 0) return;
-
-                this.searchMatches[this.currentSearchIndex].classList.remove('current');
-                this.currentSearchIndex = (this.currentSearchIndex + direction + this.searchMatches.length) % this.searchMatches.length;
-                this.searchMatches[this.currentSearchIndex].classList.add('current');
-                this.searchMatches[this.currentSearchIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
-                document.getElementById('searchResults').textContent = `${this.currentSearchIndex + 1} / ${this.searchMatches.length}`;
-            }
-
-            // Global search functionality
-            globalSearchTimeout = null;
-            cachedMdContent = {};
-            lastGlobalQuery = '';
-
-            debounceGlobalSearch(query) {
-                clearTimeout(this.globalSearchTimeout);
-
-                if (!query || query.length < 2) {
-                    document.getElementById('globalSearchResults').innerHTML = '';
-                    document.getElementById('globalSearchSpinner').style.display = 'none';
-                    return;
-                }
-
-                document.getElementById('globalSearchSpinner').style.display = 'inline';
-
-                this.globalSearchTimeout = setTimeout(() => {
-                    this.performGlobalSearch(query);
-                }, 300);
-            }
-
-            async performGlobalSearch(query) {
-                this.lastGlobalQuery = query;
-                const resultsContainer = document.getElementById('globalSearchResults');
-                const spinner = document.getElementById('globalSearchSpinner');
-                const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-
-                const results = [];
-
-                // Fetch and search all teljes.md files
-                for (const [chapterName, media] of Object.entries(MEDIA)) {
-                    if (!media.teljes) continue;
-
-                    try {
-                        // Use cached content if available
-                        if (!this.cachedMdContent[chapterName]) {
-                            const response = await fetch(media.teljes);
-                            if (response.ok) {
-                                this.cachedMdContent[chapterName] = await response.text();
-                            }
-                        }
-
-                        const content = this.cachedMdContent[chapterName];
-                        if (!content) continue;
-
-                        const matches = content.match(regex);
-                        if (matches && matches.length > 0) {
-                            // Extract snippets with context
-                            const snippets = [];
-                            const lowerContent = content.toLowerCase();
-                            const lowerQuery = query.toLowerCase();
-                            let searchPos = 0;
-                            let snippetCount = 0;
-
-                            while (snippetCount < 3) {  // Max 3 snippets per file
-                                const matchPos = lowerContent.indexOf(lowerQuery, searchPos);
-                                if (matchPos === -1) break;
-
-                                const start = Math.max(0, matchPos - 50);
-                                const end = Math.min(content.length, matchPos + query.length + 50);
-                                let snippet = content.substring(start, end);
-
-                                // Clean up snippet
-                                snippet = snippet.replace(/\n+/g, ' ').trim();
-                                if (start > 0) snippet = '...' + snippet;
-                                if (end < content.length) snippet = snippet + '...';
-
-                                // Highlight the match in snippet
-                                snippet = snippet.replace(regex, '<mark>$&</mark>');
-
-                                snippets.push(snippet);
-                                searchPos = matchPos + query.length;
-                                snippetCount++;
-                            }
-
-                            results.push({
-                                chapter: chapterName,
-                                count: matches.length,
-                                snippets: snippets
-                            });
-                        }
-                    } catch (err) {
-                        console.error(`Error searching ${chapterName}:`, err);
-                    }
-                }
-
-                spinner.style.display = 'none';
-
-                // Display results
-                if (results.length === 0) {
-                    resultsContainer.innerHTML = '<div class="global-search-no-results">Nincs találat</div>';
-                    return;
-                }
-
-                // Sort by match count
-                results.sort((a, b) => b.count - a.count);
-
-                resultsContainer.innerHTML = results.map(r => `
-                    <div class="search-result-item" onclick="app.openResultWithSearch('${r.chapter}', '${query.replace(/'/g, "\\'")}')">
-                        <div class="search-result-header">
-                            <span class="search-result-title">${r.chapter}</span>
-                            <span class="search-result-count">${r.count} találat</span>
-                        </div>
-                        <div class="search-result-snippets">
-                            ${r.snippets.map(s => `<div class="search-result-snippet">${s}</div>`).join('')}
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            openResultWithSearch(chapter, query) {
-                // Open the markdown file
-                this.openMarkdown(chapter, 'teljes');
-
-                // Wait for content to load, then trigger search
-                const checkLoaded = setInterval(() => {
-                    const content = document.getElementById('kivonatContent');
-                    if (content && content.innerHTML && !content.innerHTML.includes('Betöltés')) {
-                        clearInterval(checkLoaded);
-                        // Populate search field and trigger search
-                        const searchInput = document.getElementById('markdownSearch');
-                        searchInput.value = query;
-                        this.searchMarkdown(query);
-                    }
-                }, 100);
-
-                // Safety timeout after 5 seconds
-                setTimeout(() => clearInterval(checkLoaded), 5000);
             }
         }
 
