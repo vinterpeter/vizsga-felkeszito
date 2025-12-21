@@ -52,6 +52,14 @@
             background-clip: text;
         }
 
+        header h1 .title-full {
+            display: inline;
+        }
+
+        header h1 .title-short {
+            display: none;
+        }
+
         .header-buttons {
             position: absolute;
             right: 0;
@@ -2056,6 +2064,44 @@
             .topics-grid {
                 grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
             }
+
+            header h1 {
+                font-size: 1.4rem;
+            }
+
+            header h1 .title-full {
+                display: none;
+            }
+
+            header h1 .title-short {
+                display: inline;
+            }
+
+            .header-buttons {
+                gap: 6px;
+            }
+
+            .header-search-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            header h1 {
+                font-size: 1.2rem;
+            }
+
+            .header-buttons {
+                gap: 4px;
+            }
+
+            .header-search-btn {
+                width: 28px;
+                height: 28px;
+                font-size: 0.9rem;
+            }
         }
     </style>
     <!-- Markdown parser -->
@@ -2088,7 +2134,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>Vizsgafelkészítő</h1>
+            <h1><span class="title-full">Vizsgafelkészítő</span><span class="title-short">Vizsga</span></h1>
             <div class="header-buttons">
                 <button class="header-search-btn" onclick="app.toggleGlobalSearch()" title="Kulcsszó keresés">🔍</button>
                 <button class="header-search-btn ai-btn" onclick="app.toggleAiSearch()" title="AI kereső - kérdezz bármit!">🤖</button>
