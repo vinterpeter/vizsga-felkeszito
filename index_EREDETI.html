@@ -1477,6 +1477,12 @@
             background: #00ff88;
         }
 
+        .offline-badge.update {
+            display: block;
+            background: #ffaa00;
+            animation: pulse 1.5s infinite;
+        }
+
         @keyframes spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
@@ -1792,6 +1798,15 @@
 
         .modal-search-bar button:hover {
             background: rgba(0,217,255,0.3);
+        }
+
+        .modal-search-bar .search-bar-close {
+            background: rgba(255,107,107,0.3);
+            color: #ff6b6b;
+        }
+
+        .modal-search-bar .search-bar-close:hover {
+            background: rgba(255,107,107,0.5);
         }
 
         .search-highlight {
@@ -2271,7 +2286,7 @@
             <div class="offline-panel-content">
                 <div class="offline-panel-header">
                     <span class="offline-panel-title">📥 Offline mód</span>
-                    <span class="offline-version" id="offlineVersion">v1.1.0</span>
+                    <span class="offline-version" id="offlineVersion">v1.2.0</span>
                     <button class="offline-panel-close" onclick="app.toggleOfflinePanel()">&times;</button>
                 </div>
                 <div class="offline-status" id="offlineStatus">
@@ -2352,6 +2367,7 @@
                 <span id="searchResults"></span>
                 <button onclick="app.navigateSearch(-1)" title="Előző">▲</button>
                 <button onclick="app.navigateSearch(1)" title="Következő">▼</button>
+                <button onclick="app.closeMarkdown()" title="Bezárás" class="search-bar-close">✕</button>
             </div>
             <div id="kivonatContent" class="markdown-content"></div>
             <div class="modal-footer">
@@ -4735,7 +4751,9 @@
                         this.onCacheCleared();
                         break;
                     case 'VERSION':
-                        document.getElementById('offlineVersion').textContent = data.version;
+                        document.getElementById('offlineVersion').textContent = 'v' + data.version;
+                        this.currentSwVersion = data.version;
+                        this.checkVersionStatus();
                         break;
                 }
             }
@@ -4753,6 +4771,14 @@
             }
 
             async updateOfflineStatus() {
+                // Get version from SW - this will trigger checkVersionStatus when received
+                if (navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({ type: 'GET_VERSION' });
+                    navigator.serviceWorker.controller.postMessage({ type: 'GET_CACHE_SIZE' });
+                }
+            }
+
+            checkVersionStatus() {
                 const statusIcon = document.getElementById('offlineStatusIcon');
                 const statusText = document.getElementById('offlineStatusText');
                 const badge = document.getElementById('offlineBadge');
@@ -4761,34 +4787,10 @@
                 const syncBtn = document.getElementById('offlineSyncBtn');
                 const clearBtn = document.getElementById('offlineClearBtn');
 
-                // Get version from SW
-                if (navigator.serviceWorker.controller) {
-                    navigator.serviceWorker.controller.postMessage({ type: 'GET_VERSION' });
-                    navigator.serviceWorker.controller.postMessage({ type: 'GET_CACHE_SIZE' });
-                }
-
-                // Check if we have cached data
                 const lastSync = localStorage.getItem('vizsga_lastSync');
-                const offlineReady = localStorage.getItem('vizsga_offlineReady') === 'true';
+                const cachedVersion = localStorage.getItem('vizsga_cachedVersion');
 
-                if (offlineReady && lastSync) {
-                    // Already downloaded
-                    statusIcon.textContent = '✅';
-                    statusText.textContent = 'Offline mód elérhető';
-                    badge.className = 'offline-badge ready';
-                    btn.classList.add('ready');
-
-                    downloadBtn.textContent = '📥 Újratöltés';
-                    syncBtn.style.display = 'block';
-                    clearBtn.style.display = 'block';
-
-                    // Format last sync date
-                    const syncDate = new Date(parseInt(lastSync));
-                    document.getElementById('offlineLastSync').textContent = this.formatDate(syncDate);
-
-                    // Check for updates
-                    this.checkForUpdatesQuiet();
-                } else {
+                if (!cachedVersion || !lastSync) {
                     // Not downloaded yet
                     statusIcon.textContent = '📥';
                     statusText.textContent = 'Nincs offline adat';
@@ -4800,6 +4802,32 @@
                     clearBtn.style.display = 'none';
 
                     document.getElementById('offlineLastSync').textContent = '-';
+                } else if (cachedVersion === this.currentSwVersion) {
+                    // Version matches - fully ready
+                    statusIcon.textContent = '✅';
+                    statusText.textContent = 'Offline mód elérhető';
+                    badge.className = 'offline-badge ready';
+                    btn.classList.add('ready');
+
+                    downloadBtn.textContent = '📥 Újratöltés';
+                    syncBtn.style.display = 'block';
+                    clearBtn.style.display = 'block';
+
+                    const syncDate = new Date(parseInt(lastSync));
+                    document.getElementById('offlineLastSync').textContent = this.formatDate(syncDate);
+                } else {
+                    // Version mismatch - update available
+                    statusIcon.textContent = '⚠️';
+                    statusText.textContent = `Frissítés elérhető (v${this.currentSwVersion})`;
+                    badge.className = 'offline-badge update';
+                    btn.classList.add('ready');
+
+                    downloadBtn.textContent = '📥 Frissítés letöltése';
+                    syncBtn.style.display = 'block';
+                    clearBtn.style.display = 'block';
+
+                    const syncDate = new Date(parseInt(lastSync));
+                    document.getElementById('offlineLastSync').textContent = this.formatDate(syncDate) + ` (v${cachedVersion})`;
                 }
             }
 
@@ -4924,7 +4952,8 @@
             }
 
             async cacheUrlsDirect(urls) {
-                const cache = await caches.open('vizsga-media-v1.0.0');
+                const version = this.currentSwVersion || '1.2.0';
+                const cache = await caches.open(`vizsga-media-v${version}`);
                 let completed = 0;
                 const total = urls.length;
 
@@ -4965,8 +4994,8 @@
                 downloadBtn.disabled = false;
                 progressContainer.style.display = 'none';
 
-                // Save offline status
-                localStorage.setItem('vizsga_offlineReady', 'true');
+                // Save offline status with version
+                localStorage.setItem('vizsga_cachedVersion', this.currentSwVersion);
                 localStorage.setItem('vizsga_lastSync', Date.now().toString());
 
                 // Update UI
@@ -5051,7 +5080,7 @@
             }
 
             onCacheCleared() {
-                localStorage.removeItem('vizsga_offlineReady');
+                localStorage.removeItem('vizsga_cachedVersion');
                 localStorage.removeItem('vizsga_lastSync');
                 localStorage.removeItem('vizsga_contentVersion');
 
