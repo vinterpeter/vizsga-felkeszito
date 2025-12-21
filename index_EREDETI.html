@@ -1041,6 +1041,21 @@
     </style>
     <!-- Markdown parser -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'dark',
+            themeVariables: {
+                primaryColor: '#1a1a2e',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#00d9ff',
+                lineColor: '#00d9ff',
+                secondaryColor: '#16213e',
+                tertiaryColor: '#0f3460'
+            }
+        });
+    </script>
 </head>
 <body>
     <div class="container">
@@ -2016,8 +2031,35 @@
 
                     try {
                         const response = await fetch(path);
-                        const content = await response.text();
-                        document.getElementById('kivonatContent').innerHTML = marked.parse(content);
+                        let content = await response.text();
+
+                        // Fix image paths - get directory from markdown path
+                        const baseDir = path.substring(0, path.lastIndexOf('/') + 1);
+                        content = content.replace(/!\[([^\]]*)\]\(images\//g, `![$1](${baseDir}images/`);
+
+                        const container = document.getElementById('kivonatContent');
+                        container.innerHTML = marked.parse(content);
+
+                        // Render Mermaid diagrams
+                        const codeBlocks = container.querySelectorAll('pre code');
+                        codeBlocks.forEach((block) => {
+                            const code = block.textContent;
+                            if (code.trim().startsWith('flowchart') ||
+                                code.trim().startsWith('graph') ||
+                                code.trim().startsWith('sequenceDiagram') ||
+                                code.trim().startsWith('classDiagram') ||
+                                code.trim().startsWith('stateDiagram') ||
+                                code.trim().startsWith('erDiagram') ||
+                                code.trim().startsWith('gantt') ||
+                                code.trim().startsWith('pie') ||
+                                code.trim().startsWith('mindmap')) {
+                                const div = document.createElement('div');
+                                div.className = 'mermaid';
+                                div.textContent = code;
+                                block.parentNode.replaceWith(div);
+                            }
+                        });
+                        mermaid.run();
                     } catch (err) {
                         document.getElementById('kivonatContent').innerHTML = '<p style="color:#e74c3c">Hiba a betöltéskor.</p>';
                     }
