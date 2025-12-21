@@ -1,5 +1,5 @@
 // Service Worker for Vizsgafelkeszito PWA
-const CACHE_VERSION = '1.2.2';
+const CACHE_VERSION = '1.2.3';
 const CACHE_NAME = `vizsga-cache-v${CACHE_VERSION}`;
 const DATA_CACHE_NAME = `vizsga-data-v${CACHE_VERSION}`;
 const MEDIA_CACHE_NAME = `vizsga-media-v${CACHE_VERSION}`;

@@ -2286,7 +2286,7 @@
             <div class="offline-panel-content">
                 <div class="offline-panel-header">
                     <span class="offline-panel-title">📥 Offline mód</span>
-                    <span class="offline-version" id="offlineVersion">v1.2.2</span>
+                    <span class="offline-version" id="offlineVersion">v1.2.3</span>
                     <button class="offline-panel-close" onclick="app.toggleOfflinePanel()">&times;</button>
                 </div>
                 <div class="offline-status" id="offlineStatus">
@@ -4394,6 +4394,18 @@
 
                 const status = document.getElementById('aiSearchStatus');
                 status.className = 'ai-search-status loading';
+
+                // Check if offline and embeddings not cached
+                if (!navigator.onLine) {
+                    // Try to load from cache
+                    const cache = await caches.match('embeddings.json');
+                    if (!cache) {
+                        status.className = 'ai-search-status error';
+                        status.textContent = '📴 Offline vagy. Az AI kereséshez először töltsd le az offline adatokat.';
+                        return;
+                    }
+                }
+
                 status.textContent = '⏳ AI modell betöltése... (első alkalommal lassabb lehet)';
 
                 try {
@@ -4401,6 +4413,7 @@
                     if (!this.embeddingsData) {
                         status.textContent = '⏳ Tudásbázis betöltése...';
                         const response = await fetch('embeddings.json');
+                        if (!response.ok) throw new Error('Embeddings not available');
                         this.embeddingsData = await response.json();
                     }
 
@@ -4419,7 +4432,11 @@
                 } catch (error) {
                     console.error('AI search init error:', error);
                     status.className = 'ai-search-status error';
-                    status.textContent = '❌ Hiba az AI betöltésekor. Próbáld újra később.';
+                    if (!navigator.onLine) {
+                        status.textContent = '📴 Offline vagy. Töltsd le az AI modellt az offline letöltésnél.';
+                    } else {
+                        status.textContent = '❌ Hiba az AI betöltésekor. Próbáld újra később.';
+                    }
                 }
             }
 
@@ -4777,7 +4794,7 @@
                     navigator.serviceWorker.controller.postMessage({ type: 'GET_CACHE_SIZE' });
                 } else {
                     // SW not ready yet, check status with default version
-                    this.currentSwVersion = '1.2.2';
+                    this.currentSwVersion = '1.2.3';
                     this.checkVersionStatus();
                 }
             }
@@ -4963,7 +4980,7 @@
             }
 
             async cacheUrlsDirect(urls) {
-                const version = this.currentSwVersion || '1.2.2';
+                const version = this.currentSwVersion || '1.2.3';
                 const cache = await caches.open(`vizsga-media-v${version}`);
                 let completed = 0;
                 const total = urls.length;
@@ -5006,7 +5023,7 @@
                 progressContainer.style.display = 'none';
 
                 // Save offline status with version (use fallback if not set)
-                const version = this.currentSwVersion || '1.2.2';
+                const version = this.currentSwVersion || '1.2.3';
                 localStorage.setItem('vizsga_cachedVersion', version);
                 localStorage.setItem('vizsga_lastSync', Date.now().toString());
 
