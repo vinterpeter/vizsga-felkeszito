@@ -387,7 +387,7 @@
         }
 
         .card-back {
-            background: linear-gradient(145deg, #1e3a2a, #1a2e1e);
+            background: linear-gradient(145deg, #1e3a2a, #1e3a2e);
             border: 2px solid rgba(0, 255, 136, 0.3);
             transform: rotateY(180deg);
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
@@ -2286,7 +2286,7 @@
             <div class="offline-panel-content">
                 <div class="offline-panel-header">
                     <span class="offline-panel-title">📥 Offline mód</span>
-                    <span class="offline-version" id="offlineVersion">v1.2.1</span>
+                    <span class="offline-version" id="offlineVersion">v1.2.2</span>
                     <button class="offline-panel-close" onclick="app.toggleOfflinePanel()">&times;</button>
                 </div>
                 <div class="offline-status" id="offlineStatus">
@@ -4777,7 +4777,7 @@
                     navigator.serviceWorker.controller.postMessage({ type: 'GET_CACHE_SIZE' });
                 } else {
                     // SW not ready yet, check status with default version
-                    this.currentSwVersion = '1.2.1';
+                    this.currentSwVersion = '1.2.2';
                     this.checkVersionStatus();
                 }
             }
@@ -4963,7 +4963,7 @@
             }
 
             async cacheUrlsDirect(urls) {
-                const version = this.currentSwVersion || '1.2.1';
+                const version = this.currentSwVersion || '1.2.2';
                 const cache = await caches.open(`vizsga-media-v${version}`);
                 let completed = 0;
                 const total = urls.length;
@@ -5005,12 +5005,29 @@
                 downloadBtn.disabled = false;
                 progressContainer.style.display = 'none';
 
-                // Save offline status with version
-                localStorage.setItem('vizsga_cachedVersion', this.currentSwVersion);
+                // Save offline status with version (use fallback if not set)
+                const version = this.currentSwVersion || '1.2.2';
+                localStorage.setItem('vizsga_cachedVersion', version);
                 localStorage.setItem('vizsga_lastSync', Date.now().toString());
 
-                // Update UI
-                this.updateOfflineStatus();
+                // Update UI immediately
+                const statusIcon = document.getElementById('offlineStatusIcon');
+                const statusText = document.getElementById('offlineStatusText');
+                const badge = document.getElementById('offlineBadge');
+                const btn = document.getElementById('offlineBtn');
+
+                statusIcon.textContent = '✅';
+                statusText.textContent = 'Offline mód elérhető';
+                badge.className = 'offline-badge ready';
+                btn.classList.add('ready');
+
+                const syncBtn = document.getElementById('offlineSyncBtn');
+                const clearBtn = document.getElementById('offlineClearBtn');
+                syncBtn.style.display = 'block';
+                clearBtn.style.display = 'block';
+
+                document.getElementById('offlineLastSync').textContent = 'Most';
+                downloadBtn.textContent = '📥 Újratöltés';
 
                 // Show success message
                 alert(`✅ Offline letöltés kész!\n${total} fájl mentve.`);
