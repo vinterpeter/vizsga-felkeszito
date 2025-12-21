@@ -2136,13 +2136,18 @@
             }
 
             /* AI search mobile */
+            /* Prevent iOS auto-zoom on input focus */
+            .global-search-input-wrapper input,
+            .ai-search-input-wrapper input {
+                font-size: 16px !important;
+            }
+
             .ai-search-input-wrapper {
                 gap: 6px;
             }
 
             .ai-search-input-wrapper input {
                 padding: 10px 12px;
-                font-size: 0.9rem;
             }
 
             .ai-camera-btn {
