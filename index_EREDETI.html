@@ -1130,6 +1130,46 @@
             color: #ff6b6b;
         }
 
+        .ai-result-type.markdown {
+            background: rgba(254,202,87,0.2);
+            color: #feca57;
+        }
+
+        .ai-result-markdown {
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .ai-result-markdown:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(254,202,87,0.2);
+        }
+
+        .ai-result-markdown-content {
+            font-size: 0.9rem;
+            max-height: 150px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .ai-result-markdown-content::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: linear-gradient(transparent, rgba(30,30,30,0.95));
+        }
+
+        .ai-result-open-hint {
+            margin-top: 10px;
+            text-align: center;
+            color: #feca57;
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
         .ai-result-chapter {
             font-size: 0.8rem;
             color: #888;
@@ -3771,15 +3811,13 @@
 
                 container.innerHTML = results.map(item => {
                     const similarityPercent = Math.round(item.similarity * 100);
-                    const typeClass = item.type === 'flashcard' ? 'flashcard' : 'quiz';
-                    const typeLabel = item.type === 'flashcard' ? 'Tanulókártya' : 'Kvíz';
 
                     if (item.type === 'flashcard') {
                         return `
                             <div class="ai-result-item">
                                 <div class="ai-result-header">
                                     <div>
-                                        <span class="ai-result-type ${typeClass}">${typeLabel}</span>
+                                        <span class="ai-result-type flashcard">Tanulókártya</span>
                                         <span class="ai-result-chapter">${item.chapter}</span>
                                     </div>
                                     <span class="ai-result-similarity">${similarityPercent}% egyezés</span>
@@ -3788,13 +3826,13 @@
                                 <div class="ai-result-answer">${item.back}</div>
                             </div>
                         `;
-                    } else {
+                    } else if (item.type === 'quiz') {
                         const correctAnswer = item.answers[item.correct];
                         return `
                             <div class="ai-result-item">
                                 <div class="ai-result-header">
                                     <div>
-                                        <span class="ai-result-type ${typeClass}">${typeLabel}</span>
+                                        <span class="ai-result-type quiz">Kvíz</span>
                                         <span class="ai-result-chapter">${item.chapter}</span>
                                     </div>
                                     <span class="ai-result-similarity">${similarityPercent}% egyezés</span>
@@ -3804,8 +3842,44 @@
                                 ${item.explanation ? `<div class="ai-result-explanation">💡 ${item.explanation}</div>` : ''}
                             </div>
                         `;
+                    } else if (item.type === 'markdown') {
+                        return `
+                            <div class="ai-result-item ai-result-markdown" onclick="app.openMarkdownFromAi('${item.chapter}', '${item.title.replace(/'/g, "\\'")}')">
+                                <div class="ai-result-header">
+                                    <div>
+                                        <span class="ai-result-type markdown">📄 Tananyag</span>
+                                        <span class="ai-result-chapter">${item.chapter}</span>
+                                    </div>
+                                    <span class="ai-result-similarity">${similarityPercent}% egyezés</span>
+                                </div>
+                                <div class="ai-result-question">${item.title}</div>
+                                <div class="ai-result-answer ai-result-markdown-content">${item.content.substring(0, 500)}${item.content.length > 500 ? '...' : ''}</div>
+                                <div class="ai-result-open-hint">📖 Kattints a teljes anyag megnyitásához</div>
+                            </div>
+                        `;
                     }
+                    return '';
                 }).join('');
+            }
+
+            openMarkdownFromAi(chapter, sectionTitle) {
+                // Set chapter and open markdown
+                this.currentChapter = chapter;
+                this.openMarkdown('teljes');
+
+                // Wait for content to load, then search for section title
+                const checkLoaded = setInterval(() => {
+                    const content = document.getElementById('kivonatContent');
+                    if (content && content.innerHTML && !content.innerHTML.includes('Betöltés')) {
+                        clearInterval(checkLoaded);
+                        // Search for the section title
+                        const searchInput = document.getElementById('markdownSearch');
+                        searchInput.value = sectionTitle;
+                        this.searchMarkdown(sectionTitle);
+                    }
+                }, 100);
+
+                setTimeout(() => clearInterval(checkLoaded), 5000);
             }
 
             debounceGlobalSearch(query) {
