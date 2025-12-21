@@ -1358,8 +1358,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>Tanulás</h1>
-            <p class="subtitle" id="subtitle">Harci Kiszolgáló Támogatás - Vizsgafelkészítő</p>
+            <h1>Vizsgafelkészítő</h1>
         </header>
 
         <!-- Global Search -->
@@ -2605,8 +2604,8 @@
                 this.currentScreen = 'learning';
 
                 if (mode === 'materials') {
-                    // Use the main chapter name for materials (matches MEDIA keys)
-                    this.currentChapter = "Harci kiszolgáló támogatás";
+                    // Use the first selected topic for materials
+                    this.currentChapter = Array.from(this.selectedTopics)[0];
                 } else {
                     this.initLearning();
                 }
