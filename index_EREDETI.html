@@ -52,9 +52,14 @@
             background-clip: text;
         }
 
-        .header-search-btn {
+        .header-buttons {
             position: absolute;
             right: 0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-search-btn {
             background: rgba(255,255,255,0.1);
             border: 1px solid rgba(255,255,255,0.2);
             border-radius: 50%;
@@ -72,6 +77,11 @@
             background: rgba(0,217,255,0.2);
             border-color: #00d9ff;
             transform: scale(1.1);
+        }
+
+        .header-search-btn.ai-btn:hover {
+            background: rgba(0,255,136,0.2);
+            border-color: #00ff88;
         }
 
         .global-search-close {
@@ -982,6 +992,185 @@
             font-style: italic;
         }
 
+        /* AI Search */
+        .ai-search-container {
+            background: linear-gradient(135deg, rgba(0,255,136,0.1), rgba(0,217,255,0.1));
+            border: 1px solid rgba(0,255,136,0.3);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .ai-search-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .ai-search-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #00ff88;
+        }
+
+        .ai-search-input-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+
+        .ai-search-input-wrapper input {
+            flex: 1;
+            padding: 14px 20px;
+            font-size: 1rem;
+            background: rgba(0,0,0,0.3);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .ai-search-input-wrapper input:focus {
+            outline: none;
+            border-color: #00ff88;
+            box-shadow: 0 0 15px rgba(0,255,136,0.2);
+        }
+
+        .ai-search-input-wrapper input::placeholder {
+            color: #666;
+        }
+
+        .ai-search-submit {
+            padding: 14px 25px;
+            background: linear-gradient(145deg, #00ff88, #00cc6a);
+            border: none;
+            border-radius: 12px;
+            color: #000;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .ai-search-submit:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0,255,136,0.3);
+        }
+
+        .ai-search-submit:disabled {
+            background: #444;
+            color: #888;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .ai-search-status {
+            margin-top: 15px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .ai-search-status.loading {
+            display: block;
+            background: rgba(0,217,255,0.1);
+            color: #00d9ff;
+            border: 1px solid rgba(0,217,255,0.3);
+        }
+
+        .ai-search-status.error {
+            display: block;
+            background: rgba(255,107,107,0.1);
+            color: #ff6b6b;
+            border: 1px solid rgba(255,107,107,0.3);
+        }
+
+        .ai-search-results {
+            margin-top: 20px;
+        }
+
+        .ai-result-item {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.2s ease;
+        }
+
+        .ai-result-item:hover {
+            border-color: rgba(0,255,136,0.3);
+            background: rgba(0,255,136,0.05);
+        }
+
+        .ai-result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .ai-result-type {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .ai-result-type.flashcard {
+            background: rgba(0,217,255,0.2);
+            color: #00d9ff;
+        }
+
+        .ai-result-type.quiz {
+            background: rgba(255,107,107,0.2);
+            color: #ff6b6b;
+        }
+
+        .ai-result-chapter {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .ai-result-similarity {
+            background: rgba(0,255,136,0.2);
+            color: #00ff88;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .ai-result-question {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .ai-result-answer {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid #00ff88;
+            color: #ccc;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .ai-result-explanation {
+            margin-top: 10px;
+            padding: 10px 15px;
+            background: rgba(254,202,87,0.1);
+            border-radius: 8px;
+            color: #feca57;
+            font-size: 0.9rem;
+        }
+
         /* Kivonat Modal */
         .modal-overlay {
             display: none;
@@ -1381,6 +1570,11 @@
     <!-- Markdown parser -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <!-- Transformers.js for AI search -->
+    <script type="module">
+        import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
+        window.TransformersReady = pipeline;
+    </script>
     <script>
         mermaid.initialize({
             startOnLoad: false,
@@ -1400,8 +1594,25 @@
     <div class="container">
         <header>
             <h1>Vizsgafelkészítő</h1>
-            <button class="header-search-btn" onclick="app.toggleGlobalSearch()" title="Keresés">🔍</button>
+            <div class="header-buttons">
+                <button class="header-search-btn" onclick="app.toggleGlobalSearch()" title="Kulcsszó keresés">🔍</button>
+                <button class="header-search-btn ai-btn" onclick="app.toggleAiSearch()" title="AI kereső - kérdezz bármit!">🤖</button>
+            </div>
         </header>
+
+        <!-- AI Search (hidden by default) -->
+        <div id="aiSearchContainer" class="ai-search-container" style="display: none;">
+            <div class="ai-search-header">
+                <span class="ai-search-title">🤖 Kérdezz bármit a tananyagból!</span>
+                <button class="global-search-close" onclick="app.toggleAiSearch()">&times;</button>
+            </div>
+            <div class="ai-search-input-wrapper">
+                <input type="text" id="aiSearchInput" placeholder="Pl.: Mi a harckocsi három fő összetevője?" onkeypress="if(event.key==='Enter')app.performAiSearch()">
+                <button class="ai-search-submit" onclick="app.performAiSearch()">Keresés</button>
+            </div>
+            <div id="aiSearchStatus" class="ai-search-status"></div>
+            <div id="aiSearchResults" class="ai-search-results"></div>
+        </div>
 
         <!-- Global Search (hidden by default) -->
         <div id="globalSearchContainer" class="global-search-container" style="display: none;">
@@ -3422,9 +3633,179 @@
                     document.getElementById('globalSearchResults').innerHTML = '';
                 } else {
                     container.style.display = 'block';
+                    // Close AI search if open
+                    document.getElementById('aiSearchContainer').style.display = 'none';
                     // Focus on input when opening
                     document.getElementById('globalSearchInput').focus();
                 }
+            }
+
+            // AI Search functionality
+            embeddingsData = null;
+            embeddingModel = null;
+            aiSearchReady = false;
+
+            toggleAiSearch() {
+                const container = document.getElementById('aiSearchContainer');
+                const isVisible = container.style.display !== 'none';
+
+                if (isVisible) {
+                    container.style.display = 'none';
+                } else {
+                    container.style.display = 'block';
+                    // Close global search if open
+                    document.getElementById('globalSearchContainer').style.display = 'none';
+                    // Focus on input
+                    document.getElementById('aiSearchInput').focus();
+                    // Initialize AI search if not done
+                    this.initAiSearch();
+                }
+            }
+
+            async initAiSearch() {
+                if (this.aiSearchReady) return;
+
+                const status = document.getElementById('aiSearchStatus');
+                status.className = 'ai-search-status loading';
+                status.textContent = '⏳ AI modell betöltése... (első alkalommal lassabb lehet)';
+
+                try {
+                    // Load embeddings
+                    if (!this.embeddingsData) {
+                        status.textContent = '⏳ Tudásbázis betöltése...';
+                        const response = await fetch('embeddings.json');
+                        this.embeddingsData = await response.json();
+                    }
+
+                    // Load Transformers.js model
+                    if (!this.embeddingModel && window.TransformersReady) {
+                        status.textContent = '⏳ AI modell betöltése... (kb. 50MB, első alkalommal)';
+                        this.embeddingModel = await window.TransformersReady(
+                            'feature-extraction',
+                            'Xenova/paraphrase-multilingual-MiniLM-L12-v2'
+                        );
+                    }
+
+                    this.aiSearchReady = true;
+                    status.className = 'ai-search-status';
+                    status.style.display = 'none';
+                } catch (error) {
+                    console.error('AI search init error:', error);
+                    status.className = 'ai-search-status error';
+                    status.textContent = '❌ Hiba az AI betöltésekor. Próbáld újra később.';
+                }
+            }
+
+            async performAiSearch() {
+                const query = document.getElementById('aiSearchInput').value.trim();
+                if (!query) return;
+
+                const status = document.getElementById('aiSearchStatus');
+                const results = document.getElementById('aiSearchResults');
+                const submitBtn = document.querySelector('.ai-search-submit');
+
+                // Disable button during search
+                submitBtn.disabled = true;
+
+                // Ensure AI is initialized
+                if (!this.aiSearchReady) {
+                    await this.initAiSearch();
+                }
+
+                if (!this.embeddingModel || !this.embeddingsData) {
+                    status.className = 'ai-search-status error';
+                    status.textContent = '❌ AI nem elérhető. Frissítsd az oldalt.';
+                    submitBtn.disabled = false;
+                    return;
+                }
+
+                status.className = 'ai-search-status loading';
+                status.textContent = '🔍 Keresés a tudásbázisban...';
+
+                try {
+                    // Generate query embedding
+                    const output = await this.embeddingModel(query, { pooling: 'mean', normalize: true });
+                    const queryEmbedding = Array.from(output.data);
+
+                    // Calculate similarities
+                    const similarities = this.embeddingsData.items.map((item, index) => {
+                        const similarity = this.cosineSimilarity(queryEmbedding, item.embedding);
+                        return { ...item, similarity, index };
+                    });
+
+                    // Sort by similarity and get top 5
+                    similarities.sort((a, b) => b.similarity - a.similarity);
+                    const topResults = similarities.slice(0, 5);
+
+                    // Display results
+                    this.displayAiResults(topResults);
+                    status.style.display = 'none';
+                } catch (error) {
+                    console.error('AI search error:', error);
+                    status.className = 'ai-search-status error';
+                    status.textContent = '❌ Hiba a keresés során: ' + error.message;
+                }
+
+                submitBtn.disabled = false;
+            }
+
+            cosineSimilarity(a, b) {
+                let dotProduct = 0;
+                let normA = 0;
+                let normB = 0;
+                for (let i = 0; i < a.length; i++) {
+                    dotProduct += a[i] * b[i];
+                    normA += a[i] * a[i];
+                    normB += b[i] * b[i];
+                }
+                return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+            }
+
+            displayAiResults(results) {
+                const container = document.getElementById('aiSearchResults');
+
+                if (results.length === 0) {
+                    container.innerHTML = '<p class="global-search-no-results">Nincs releváns találat</p>';
+                    return;
+                }
+
+                container.innerHTML = results.map(item => {
+                    const similarityPercent = Math.round(item.similarity * 100);
+                    const typeClass = item.type === 'flashcard' ? 'flashcard' : 'quiz';
+                    const typeLabel = item.type === 'flashcard' ? 'Tanulókártya' : 'Kvíz';
+
+                    if (item.type === 'flashcard') {
+                        return `
+                            <div class="ai-result-item">
+                                <div class="ai-result-header">
+                                    <div>
+                                        <span class="ai-result-type ${typeClass}">${typeLabel}</span>
+                                        <span class="ai-result-chapter">${item.chapter}</span>
+                                    </div>
+                                    <span class="ai-result-similarity">${similarityPercent}% egyezés</span>
+                                </div>
+                                <div class="ai-result-question">${item.front}</div>
+                                <div class="ai-result-answer">${item.back}</div>
+                            </div>
+                        `;
+                    } else {
+                        const correctAnswer = item.answers[item.correct];
+                        return `
+                            <div class="ai-result-item">
+                                <div class="ai-result-header">
+                                    <div>
+                                        <span class="ai-result-type ${typeClass}">${typeLabel}</span>
+                                        <span class="ai-result-chapter">${item.chapter}</span>
+                                    </div>
+                                    <span class="ai-result-similarity">${similarityPercent}% egyezés</span>
+                                </div>
+                                <div class="ai-result-question">${item.question}</div>
+                                <div class="ai-result-answer">✓ ${correctAnswer}</div>
+                                ${item.explanation ? `<div class="ai-result-explanation">💡 ${item.explanation}</div>` : ''}
+                            </div>
+                        `;
+                    }
+                }).join('');
             }
 
             debounceGlobalSearch(query) {
