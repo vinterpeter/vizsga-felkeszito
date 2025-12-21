@@ -2286,7 +2286,7 @@
             <div class="offline-panel-content">
                 <div class="offline-panel-header">
                     <span class="offline-panel-title">📥 Offline mód</span>
-                    <span class="offline-version" id="offlineVersion">v1.3.2</span>
+                    <span class="offline-version" id="offlineVersion">v1.3.3</span>
                     <button class="offline-panel-close" onclick="app.toggleOfflinePanel()">&times;</button>
                 </div>
                 <div class="offline-status" id="offlineStatus">
@@ -4809,7 +4809,7 @@
                     navigator.serviceWorker.controller.postMessage({ type: 'GET_CACHE_SIZE' });
                 } else {
                     // SW not ready yet, check status with default version
-                    this.currentSwVersion = '1.3.2';
+                    this.currentSwVersion = '1.3.3';
                     this.checkVersionStatus();
                 }
             }
@@ -4933,6 +4933,15 @@
                 ];
                 urlsToCache.push(...coreFiles);
 
+                // Tesseract.js for offline OCR (always include - core feature)
+                const tesseractFiles = [
+                    'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js',
+                    'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js',
+                    'https://cdn.jsdelivr.net/npm/tesseract.js-core@5.1.1/tesseract-core-simd-lstm.wasm.js',
+                    'https://tessdata.projectnaptha.com/4.0.0/hun.traineddata.gz'
+                ];
+                urlsToCache.push(...tesseractFiles);
+
                 // AI model files for offline AI search
                 if (includeAI) {
                     const modelBase = 'https://huggingface.co/Xenova/paraphrase-multilingual-MiniLM-L12-v2/resolve/main';
@@ -5038,7 +5047,7 @@
             }
 
             async cacheUrlsDirect(urls) {
-                const version = this.currentSwVersion || '1.3.2';
+                const version = this.currentSwVersion || '1.3.3';
                 const cache = await caches.open(`vizsga-media-v${version}`);
                 let completed = 0;
                 const total = urls.length;
@@ -5081,7 +5090,7 @@
                 progressContainer.style.display = 'none';
 
                 // Save offline status with version (use fallback if not set)
-                const version = this.currentSwVersion || '1.3.2';
+                const version = this.currentSwVersion || '1.3.3';
                 localStorage.setItem('vizsga_cachedVersion', version);
                 localStorage.setItem('vizsga_lastSync', Date.now().toString());
 
