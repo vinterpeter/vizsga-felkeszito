@@ -3473,8 +3473,9 @@
             }
 
             openResultWithSearch(chapter, query) {
-                // Open the markdown file
-                this.openMarkdown(chapter, 'teljes');
+                // Set the current chapter and open the markdown file
+                this.currentChapter = chapter;
+                this.openMarkdown('teljes');
 
                 // Wait for content to load, then trigger search
                 const checkLoaded = setInterval(() => {
