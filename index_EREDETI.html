@@ -985,6 +985,36 @@
             border-radius: 3px;
         }
 
+        .search-result-type {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .search-result-type.quiz {
+            background: rgba(255,107,107,0.2);
+            color: #ff6b6b;
+        }
+
+        .search-result-type.flashcard {
+            background: rgba(255,215,0,0.2);
+            color: #ffd700;
+        }
+
+        .search-result-type.markdown {
+            background: rgba(0,217,255,0.2);
+            color: #00d9ff;
+        }
+
+        .search-result-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         .global-search-no-results {
             text-align: center;
             color: #666;
@@ -4903,6 +4933,66 @@
                 const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
 
                 const results = [];
+                const lowerQuery = query.toLowerCase();
+
+                // Helper function to create snippet with highlight
+                const createSnippet = (text, maxLength = 100) => {
+                    const lowerText = text.toLowerCase();
+                    const matchPos = lowerText.indexOf(lowerQuery);
+                    if (matchPos === -1) return null;
+
+                    const start = Math.max(0, matchPos - 40);
+                    const end = Math.min(text.length, matchPos + query.length + 60);
+                    let snippet = text.substring(start, end);
+                    snippet = snippet.replace(/\n+/g, ' ').trim();
+                    if (start > 0) snippet = '...' + snippet;
+                    if (end < text.length) snippet = snippet + '...';
+                    return snippet.replace(regex, '<mark>$&</mark>');
+                };
+
+                // Search in quiz questions
+                for (const [chapterName, data] of Object.entries(DATA)) {
+                    if (data.questions) {
+                        for (const q of data.questions) {
+                            const searchText = `${q.question} ${q.answers.join(' ')} ${q.explanation || ''}`;
+                            if (regex.test(searchText)) {
+                                const snippet = createSnippet(searchText);
+                                if (snippet) {
+                                    results.push({
+                                        type: 'quiz',
+                                        chapter: chapterName,
+                                        id: q.id,
+                                        title: q.question.substring(0, 60) + (q.question.length > 60 ? '...' : ''),
+                                        snippet: snippet,
+                                        count: (searchText.match(regex) || []).length
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Search in flashcards
+                for (const [chapterName, data] of Object.entries(DATA)) {
+                    if (data.cards) {
+                        for (const card of data.cards) {
+                            const searchText = `${card.front} ${card.back}`;
+                            if (regex.test(searchText)) {
+                                const snippet = createSnippet(searchText);
+                                if (snippet) {
+                                    results.push({
+                                        type: 'flashcard',
+                                        chapter: chapterName,
+                                        id: card.id,
+                                        title: card.front.substring(0, 60) + (card.front.length > 60 ? '...' : ''),
+                                        snippet: snippet,
+                                        count: (searchText.match(regex) || []).length
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
 
                 // Fetch and search all teljes.md files
                 for (const [chapterName, media] of Object.entries(MEDIA)) {
@@ -4925,11 +5015,10 @@
                             // Extract snippets with context
                             const snippets = [];
                             const lowerContent = content.toLowerCase();
-                            const lowerQuery = query.toLowerCase();
                             let searchPos = 0;
                             let snippetCount = 0;
 
-                            while (snippetCount < 3) {  // Max 3 snippets per file
+                            while (snippetCount < 2) {  // Max 2 snippets per file
                                 const matchPos = lowerContent.indexOf(lowerQuery, searchPos);
                                 if (matchPos === -1) break;
 
@@ -4951,9 +5040,11 @@
                             }
 
                             results.push({
+                                type: 'markdown',
                                 chapter: chapterName,
-                                count: matches.length,
-                                snippets: snippets
+                                title: chapterName,
+                                snippets: snippets,
+                                count: matches.length
                             });
                         }
                     } catch (err) {
@@ -4972,17 +5063,82 @@
                 // Sort by match count
                 results.sort((a, b) => b.count - a.count);
 
-                resultsContainer.innerHTML = results.map(r => `
-                    <div class="search-result-item" onclick="app.openResultWithSearch('${r.chapter}', '${query.replace(/'/g, "\\'")}')">
-                        <div class="search-result-header">
-                            <span class="search-result-title">${r.chapter}</span>
-                            <span class="search-result-count">${r.count} találat</span>
-                        </div>
-                        <div class="search-result-snippets">
-                            ${r.snippets.map(s => `<div class="search-result-snippet">${s}</div>`).join('')}
-                        </div>
-                    </div>
-                `).join('');
+                // Limit results
+                const limitedResults = results.slice(0, 30);
+
+                resultsContainer.innerHTML = limitedResults.map(r => {
+                    const typeLabel = r.type === 'quiz' ? 'Kvíz' : r.type === 'flashcard' ? 'Kártya' : 'Tananyag';
+                    const escapedQuery = query.replace(/'/g, "\\'");
+                    const onclick = r.type === 'markdown'
+                        ? `app.openResultWithSearch('${r.chapter}', '${escapedQuery}')`
+                        : `app.openSearchResult('${r.type}', '${r.chapter}', ${r.id})`;
+
+                    if (r.type === 'markdown') {
+                        return `
+                            <div class="search-result-item" onclick="${onclick}">
+                                <div class="search-result-header">
+                                    <div class="search-result-meta">
+                                        <span class="search-result-title">${r.chapter}</span>
+                                        <span class="search-result-type ${r.type}">${typeLabel}</span>
+                                    </div>
+                                    <span class="search-result-count">${r.count} találat</span>
+                                </div>
+                                <div class="search-result-snippets">
+                                    ${r.snippets.map(s => `<div class="search-result-snippet">${s}</div>`).join('')}
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        return `
+                            <div class="search-result-item" onclick="${onclick}">
+                                <div class="search-result-header">
+                                    <div class="search-result-meta">
+                                        <span class="search-result-title">${r.chapter}</span>
+                                        <span class="search-result-type ${r.type}">${typeLabel}</span>
+                                    </div>
+                                </div>
+                                <div class="search-result-snippets">
+                                    <div class="search-result-snippet">${r.snippet}</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }).join('');
+            }
+
+            openSearchResult(type, chapter, id) {
+                // Close search panel
+                document.getElementById('globalSearchContainer').style.display = 'none';
+
+                // Set chapter
+                this.currentChapter = chapter;
+                this.selectedTopics = [chapter];
+
+                if (type === 'quiz') {
+                    // Start quiz and jump to specific question
+                    const data = DATA[chapter];
+                    if (data && data.questions) {
+                        this.currentQuestions = [...data.questions];
+                        this.currentQuestionIndex = this.currentQuestions.findIndex(q => q.id === id);
+                        if (this.currentQuestionIndex === -1) this.currentQuestionIndex = 0;
+                        this.quizScore = 0;
+                        this.quizAnswered = 0;
+                        this.showScreen('quiz');
+                        this.showQuestion();
+                    }
+                } else if (type === 'flashcard') {
+                    // Start flashcards and jump to specific card
+                    const data = DATA[chapter];
+                    if (data && data.cards) {
+                        this.currentCards = [...data.cards];
+                        this.currentCardIndex = this.currentCards.findIndex(c => c.id === id);
+                        if (this.currentCardIndex === -1) this.currentCardIndex = 0;
+                        this.knownCards = 0;
+                        this.unknownCards = 0;
+                        this.showScreen('flashcards');
+                        this.showFlashcard();
+                    }
+                }
             }
 
             openResultWithSearch(chapter, query) {
