@@ -2286,7 +2286,7 @@
             <div class="offline-panel-content">
                 <div class="offline-panel-header">
                     <span class="offline-panel-title">📥 Offline mód</span>
-                    <span class="offline-version" id="offlineVersion">v1.2.3</span>
+                    <span class="offline-version" id="offlineVersion">v1.3.0</span>
                     <button class="offline-panel-close" onclick="app.toggleOfflinePanel()">&times;</button>
                 </div>
                 <div class="offline-status" id="offlineStatus">
@@ -4794,7 +4794,7 @@
                     navigator.serviceWorker.controller.postMessage({ type: 'GET_CACHE_SIZE' });
                 } else {
                     // SW not ready yet, check status with default version
-                    this.currentSwVersion = '1.2.3';
+                    this.currentSwVersion = '1.3.0';
                     this.checkVersionStatus();
                 }
             }
@@ -4900,24 +4900,23 @@
 
                 this.isDownloading = true;
                 downloadBtn.disabled = true;
-                downloadBtn.textContent = '⏳ Letöltés...';
+                downloadBtn.textContent = '⏳ Ellenőrzés...';
                 progressContainer.style.display = 'block';
                 statusIcon.textContent = '⏳';
-                statusText.textContent = 'Letöltés folyamatban...';
+                statusText.textContent = 'Meglévő fájlok ellenőrzése...';
 
                 // Build list of URLs to cache
                 let urlsToCache = [];
 
-                // Core app files
-                urlsToCache.push(
+                // Core app files - always refresh these
+                const coreFiles = [
                     './',
                     './index.html',
                     './index_EREDETI.html',
-                    './manifest.json'
-                );
-
-                // Embeddings if exists
-                urlsToCache.push('./embeddings.json');
+                    './manifest.json',
+                    './embeddings.json'
+                ];
+                urlsToCache.push(...coreFiles);
 
                 // AI model files for offline AI search
                 if (includeAI) {
@@ -4961,16 +4960,60 @@
                     }
                 }
 
+                // Filter out already cached URLs (except core files which we always refresh)
+                const uncachedUrls = await this.filterUncachedUrls(urlsToCache, coreFiles);
+
+                if (uncachedUrls.length === 0) {
+                    // Everything is already cached, just update version
+                    statusText.textContent = 'Minden fájl megvan!';
+                    this.onDownloadComplete(0);
+                    return;
+                }
+
+                statusText.textContent = `Letöltés: ${uncachedUrls.length} új fájl...`;
+
                 // Send to service worker
                 if (navigator.serviceWorker.controller) {
                     navigator.serviceWorker.controller.postMessage({
                         type: 'CACHE_URLS',
-                        urls: urlsToCache
+                        urls: uncachedUrls
                     });
                 } else {
                     // Fallback: direct caching
-                    await this.cacheUrlsDirect(urlsToCache);
+                    await this.cacheUrlsDirect(uncachedUrls);
                 }
+            }
+
+            async filterUncachedUrls(urls, alwaysRefresh = []) {
+                const uncached = [];
+                const cacheNames = await caches.keys();
+
+                for (const url of urls) {
+                    // Always refresh core files
+                    if (alwaysRefresh.some(core => url.endsWith(core) || url === core)) {
+                        uncached.push(url);
+                        continue;
+                    }
+
+                    // Check if URL exists in any cache
+                    let found = false;
+                    for (const cacheName of cacheNames) {
+                        if (cacheName.startsWith('vizsga-')) {
+                            const cache = await caches.open(cacheName);
+                            const response = await cache.match(url);
+                            if (response) {
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!found) {
+                        uncached.push(url);
+                    }
+                }
+
+                return uncached;
             }
 
             async getMediaImageList() {
@@ -4980,7 +5023,7 @@
             }
 
             async cacheUrlsDirect(urls) {
-                const version = this.currentSwVersion || '1.2.3';
+                const version = this.currentSwVersion || '1.3.0';
                 const cache = await caches.open(`vizsga-media-v${version}`);
                 let completed = 0;
                 const total = urls.length;
@@ -5023,7 +5066,7 @@
                 progressContainer.style.display = 'none';
 
                 // Save offline status with version (use fallback if not set)
-                const version = this.currentSwVersion || '1.2.3';
+                const version = this.currentSwVersion || '1.3.0';
                 localStorage.setItem('vizsga_cachedVersion', version);
                 localStorage.setItem('vizsga_lastSync', Date.now().toString());
 
