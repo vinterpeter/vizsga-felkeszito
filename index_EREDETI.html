@@ -1218,6 +1218,173 @@
             font-size: 0.9rem;
         }
 
+        /* Camera button in AI search */
+        .ai-camera-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 15px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .ai-camera-btn:hover {
+            background: rgba(0,217,255,0.2);
+            transform: scale(1.05);
+        }
+
+        /* Camera Modal */
+        .camera-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .camera-modal-content {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 90%;
+            max-height: 90%;
+            width: 500px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .camera-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .camera-modal-title {
+            color: #00d9ff;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .camera-modal-close {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 1.8rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .camera-modal-close:hover {
+            color: #ff6b6b;
+        }
+
+        .camera-preview-container {
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            position: relative;
+            aspect-ratio: 4/3;
+        }
+
+        .camera-preview-container video,
+        .camera-preview-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .ocr-status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .ocr-status.loading {
+            display: block;
+            background: rgba(0,217,255,0.1);
+            color: #00d9ff;
+        }
+
+        .ocr-status.success {
+            display: block;
+            background: rgba(0,255,136,0.1);
+            color: #00ff88;
+        }
+
+        .ocr-status.error {
+            display: block;
+            background: rgba(255,107,107,0.1);
+            color: #ff6b6b;
+        }
+
+        .camera-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .camera-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .capture-btn {
+            background: linear-gradient(135deg, #00d9ff, #00ff88);
+            color: #000;
+        }
+
+        .capture-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0,217,255,0.4);
+        }
+
+        .retake-btn {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
+        .retake-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .use-text-btn {
+            background: linear-gradient(135deg, #00ff88, #00d9ff);
+            color: #000;
+        }
+
+        .use-text-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0,255,136,0.4);
+        }
+
+        .ocr-result-preview {
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+            color: #fff;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            max-height: 100px;
+            overflow-y: auto;
+            border: 1px solid rgba(0,255,136,0.3);
+        }
+
         /* Kivonat Modal */
         .modal-overlay {
             display: none;
@@ -1624,6 +1791,8 @@
         env.allowLocalModels = false;
         window.TransformersReady = pipeline;
     </script>
+    <!-- Tesseract.js for OCR -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <script>
         mermaid.initialize({
             startOnLoad: false,
@@ -1657,10 +1826,32 @@
             </div>
             <div class="ai-search-input-wrapper">
                 <input type="text" id="aiSearchInput" placeholder="Pl.: Mi a harckocsi három fő összetevője?" onkeypress="if(event.key==='Enter')app.performAiSearch()">
+                <button class="ai-camera-btn" onclick="app.openCamera()" title="Kérdés beolvasása kamerával">📷</button>
                 <button class="ai-search-submit" onclick="app.performAiSearch()">Keresés</button>
             </div>
             <div id="aiSearchStatus" class="ai-search-status"></div>
             <div id="aiSearchResults" class="ai-search-results"></div>
+        </div>
+
+        <!-- Camera OCR Modal -->
+        <div id="cameraModal" class="camera-modal" style="display: none;">
+            <div class="camera-modal-content">
+                <div class="camera-modal-header">
+                    <span class="camera-modal-title">📷 Kérdés beolvasása</span>
+                    <button class="camera-modal-close" onclick="app.closeCamera()">&times;</button>
+                </div>
+                <div class="camera-preview-container">
+                    <video id="cameraVideo" autoplay playsinline></video>
+                    <canvas id="cameraCanvas" style="display: none;"></canvas>
+                    <img id="capturedImage" style="display: none;">
+                </div>
+                <div id="ocrStatus" class="ocr-status"></div>
+                <div class="camera-controls">
+                    <button id="captureBtn" class="camera-btn capture-btn" onclick="app.captureImage()">📸 Fénykép készítése</button>
+                    <button id="retakeBtn" class="camera-btn retake-btn" onclick="app.retakePhoto()" style="display: none;">🔄 Újra</button>
+                    <button id="useTextBtn" class="camera-btn use-text-btn" onclick="app.useOcrText()" style="display: none;">✓ Szöveg használata</button>
+                </div>
+            </div>
         </div>
 
         <!-- Global Search (hidden by default) -->
@@ -3889,6 +4080,148 @@
                 }, 100);
 
                 setTimeout(() => clearInterval(checkLoaded), 5000);
+            }
+
+            // Camera OCR functionality
+            cameraStream = null;
+            ocrResult = '';
+
+            async openCamera() {
+                const modal = document.getElementById('cameraModal');
+                const video = document.getElementById('cameraVideo');
+                const status = document.getElementById('ocrStatus');
+                const capturedImg = document.getElementById('capturedImage');
+
+                // Reset state
+                status.className = 'ocr-status';
+                status.textContent = '';
+                capturedImg.style.display = 'none';
+                video.style.display = 'block';
+                document.getElementById('captureBtn').style.display = 'inline-block';
+                document.getElementById('retakeBtn').style.display = 'none';
+                document.getElementById('useTextBtn').style.display = 'none';
+
+                try {
+                    // Request camera access - prefer back camera on mobile
+                    this.cameraStream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: 'environment' }
+                    });
+                    video.srcObject = this.cameraStream;
+                    modal.style.display = 'flex';
+                } catch (error) {
+                    console.error('Camera error:', error);
+                    alert('Nem sikerült hozzáférni a kamerához. Ellenőrizd a böngésző engedélyeket.');
+                }
+            }
+
+            closeCamera() {
+                const modal = document.getElementById('cameraModal');
+                const video = document.getElementById('cameraVideo');
+
+                // Stop camera stream
+                if (this.cameraStream) {
+                    this.cameraStream.getTracks().forEach(track => track.stop());
+                    this.cameraStream = null;
+                }
+                video.srcObject = null;
+                modal.style.display = 'none';
+            }
+
+            async captureImage() {
+                const video = document.getElementById('cameraVideo');
+                const canvas = document.getElementById('cameraCanvas');
+                const capturedImg = document.getElementById('capturedImage');
+                const status = document.getElementById('ocrStatus');
+
+                // Capture frame from video
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0);
+
+                // Convert to image
+                const imageData = canvas.toDataURL('image/png');
+                capturedImg.src = imageData;
+                capturedImg.style.display = 'block';
+                video.style.display = 'none';
+
+                // Stop camera
+                if (this.cameraStream) {
+                    this.cameraStream.getTracks().forEach(track => track.stop());
+                }
+
+                // Update buttons
+                document.getElementById('captureBtn').style.display = 'none';
+                document.getElementById('retakeBtn').style.display = 'inline-block';
+
+                // Start OCR
+                status.className = 'ocr-status loading';
+                status.textContent = '🔍 Szöveg felismerése... (ez eltarthat pár másodpercig)';
+
+                try {
+                    const result = await Tesseract.recognize(
+                        imageData,
+                        'hun', // Hungarian language
+                        {
+                            logger: m => {
+                                if (m.status === 'recognizing text') {
+                                    const percent = Math.round(m.progress * 100);
+                                    status.textContent = `🔍 Szöveg felismerése... ${percent}%`;
+                                }
+                            }
+                        }
+                    );
+
+                    this.ocrResult = result.data.text.trim();
+
+                    if (this.ocrResult) {
+                        status.className = 'ocr-status success';
+                        status.innerHTML = `✓ Felismert szöveg:<div class="ocr-result-preview">${this.ocrResult}</div>`;
+                        document.getElementById('useTextBtn').style.display = 'inline-block';
+                    } else {
+                        status.className = 'ocr-status error';
+                        status.textContent = '❌ Nem sikerült szöveget felismerni. Próbáld újra jobb megvilágítással.';
+                    }
+                } catch (error) {
+                    console.error('OCR error:', error);
+                    status.className = 'ocr-status error';
+                    status.textContent = '❌ Hiba a szövegfelismerés során. Próbáld újra.';
+                }
+            }
+
+            async retakePhoto() {
+                const video = document.getElementById('cameraVideo');
+                const capturedImg = document.getElementById('capturedImage');
+                const status = document.getElementById('ocrStatus');
+
+                // Reset
+                capturedImg.style.display = 'none';
+                video.style.display = 'block';
+                status.className = 'ocr-status';
+                status.textContent = '';
+                document.getElementById('captureBtn').style.display = 'inline-block';
+                document.getElementById('retakeBtn').style.display = 'none';
+                document.getElementById('useTextBtn').style.display = 'none';
+
+                // Restart camera
+                try {
+                    this.cameraStream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: 'environment' }
+                    });
+                    video.srcObject = this.cameraStream;
+                } catch (error) {
+                    console.error('Camera restart error:', error);
+                }
+            }
+
+            useOcrText() {
+                if (this.ocrResult) {
+                    // Put recognized text into search input
+                    document.getElementById('aiSearchInput').value = this.ocrResult;
+                    this.closeCamera();
+                    // Optionally auto-search
+                    this.performAiSearch();
+                }
             }
 
             debounceGlobalSearch(query) {
