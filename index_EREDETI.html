@@ -1385,6 +1385,248 @@
             border: 1px solid rgba(0,255,136,0.3);
         }
 
+        /* Offline Panel Styles */
+        .offline-btn {
+            position: relative;
+        }
+
+        .offline-btn.ready .offline-icon {
+            filter: hue-rotate(90deg);
+        }
+
+        .offline-btn.syncing .offline-icon {
+            animation: spin 1s linear infinite;
+        }
+
+        .offline-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: none;
+        }
+
+        .offline-badge.update-available {
+            display: block;
+            background: #ff6b6b;
+            animation: pulse 1.5s infinite;
+        }
+
+        .offline-badge.ready {
+            display: block;
+            background: #00ff88;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+        }
+
+        .offline-panel {
+            position: fixed;
+            top: 70px;
+            right: 15px;
+            width: 320px;
+            max-width: calc(100vw - 30px);
+            background: linear-gradient(135deg, #1e2a3a 0%, #16213e 100%);
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            z-index: 1000;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .offline-panel-content {
+            padding: 20px;
+        }
+
+        .offline-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .offline-panel-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #00d9ff;
+        }
+
+        .offline-panel-close {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .offline-panel-close:hover {
+            color: #ff6b6b;
+        }
+
+        .offline-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .offline-status-icon {
+            font-size: 2rem;
+        }
+
+        .offline-status-text {
+            font-size: 0.95rem;
+            color: #ccc;
+        }
+
+        .offline-status.ready {
+            border: 1px solid rgba(0,255,136,0.3);
+        }
+
+        .offline-status.ready .offline-status-icon::after {
+            content: '✅';
+        }
+
+        .offline-status.needs-update {
+            border: 1px solid rgba(255,107,107,0.3);
+        }
+
+        .offline-info {
+            margin-bottom: 15px;
+        }
+
+        .offline-info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.9rem;
+        }
+
+        .offline-info-row span:first-child {
+            color: #888;
+        }
+
+        .offline-info-row span:last-child {
+            color: #fff;
+        }
+
+        .offline-progress-container {
+            margin-bottom: 15px;
+        }
+
+        .offline-progress-bar {
+            height: 8px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+
+        .offline-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .offline-progress-text {
+            font-size: 0.85rem;
+            color: #888;
+            text-align: center;
+        }
+
+        .offline-options {
+            margin-bottom: 15px;
+        }
+
+        .offline-option {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            cursor: pointer;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+
+        .offline-option input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+            accent-color: #00d9ff;
+        }
+
+        .offline-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .offline-btn-primary,
+        .offline-btn-secondary,
+        .offline-btn-danger {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .offline-btn-primary {
+            background: linear-gradient(135deg, #00d9ff, #00ff88);
+            color: #000;
+        }
+
+        .offline-btn-primary:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 20px rgba(0,217,255,0.3);
+        }
+
+        .offline-btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .offline-btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .offline-btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .offline-btn-danger {
+            background: rgba(255,107,107,0.2);
+            color: #ff6b6b;
+            border: 1px solid rgba(255,107,107,0.3);
+        }
+
+        .offline-btn-danger:hover {
+            background: rgba(255,107,107,0.3);
+        }
+
         /* Kivonat Modal */
         .modal-overlay {
             display: none;
@@ -1815,6 +2057,10 @@
             <div class="header-buttons">
                 <button class="header-search-btn" onclick="app.toggleGlobalSearch()" title="Kulcsszó keresés">🔍</button>
                 <button class="header-search-btn ai-btn" onclick="app.toggleAiSearch()" title="AI kereső - kérdezz bármit!">🤖</button>
+                <button class="header-search-btn offline-btn" id="offlineBtn" onclick="app.toggleOfflinePanel()" title="Offline mód">
+                    <span class="offline-icon">📥</span>
+                    <span class="offline-badge" id="offlineBadge"></span>
+                </button>
             </div>
         </header>
 
@@ -1850,6 +2096,57 @@
                     <button id="captureBtn" class="camera-btn capture-btn" onclick="app.captureImage()">📸 Fénykép készítése</button>
                     <button id="retakeBtn" class="camera-btn retake-btn" onclick="app.retakePhoto()" style="display: none;">🔄 Újra</button>
                     <button id="useTextBtn" class="camera-btn use-text-btn" onclick="app.useOcrText()" style="display: none;">✓ Szöveg használata</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Offline Panel -->
+        <div id="offlinePanel" class="offline-panel" style="display: none;">
+            <div class="offline-panel-content">
+                <div class="offline-panel-header">
+                    <span class="offline-panel-title">📥 Offline mód</span>
+                    <button class="offline-panel-close" onclick="app.toggleOfflinePanel()">&times;</button>
+                </div>
+                <div class="offline-status" id="offlineStatus">
+                    <div class="offline-status-icon" id="offlineStatusIcon">🔄</div>
+                    <div class="offline-status-text" id="offlineStatusText">Ellenőrzés...</div>
+                </div>
+                <div class="offline-info">
+                    <div class="offline-info-row">
+                        <span>Verzió:</span>
+                        <span id="offlineVersion">-</span>
+                    </div>
+                    <div class="offline-info-row">
+                        <span>Utolsó szinkron:</span>
+                        <span id="offlineLastSync">-</span>
+                    </div>
+                    <div class="offline-info-row">
+                        <span>Tárolt adatok:</span>
+                        <span id="offlineCacheSize">-</span>
+                    </div>
+                </div>
+                <div class="offline-progress-container" id="offlineProgressContainer" style="display: none;">
+                    <div class="offline-progress-bar">
+                        <div class="offline-progress-fill" id="offlineProgressFill"></div>
+                    </div>
+                    <div class="offline-progress-text" id="offlineProgressText">0%</div>
+                </div>
+                <div class="offline-options">
+                    <label class="offline-option">
+                        <input type="checkbox" id="offlineIncludeMedia" checked>
+                        <span>Média letöltése (podcast, videó, PDF) - ~500MB</span>
+                    </label>
+                </div>
+                <div class="offline-actions">
+                    <button class="offline-btn-primary" id="offlineDownloadBtn" onclick="app.startOfflineDownload()">
+                        📥 Letöltés offline használathoz
+                    </button>
+                    <button class="offline-btn-secondary" id="offlineSyncBtn" onclick="app.checkForUpdates()" style="display: none;">
+                        🔄 Frissítések keresése
+                    </button>
+                    <button class="offline-btn-danger" id="offlineClearBtn" onclick="app.clearOfflineData()" style="display: none;">
+                        🗑️ Offline adatok törlése
+                    </button>
                 </div>
             </div>
         </div>
@@ -4224,6 +4521,360 @@
                 }
             }
 
+            // ==================== OFFLINE FUNCTIONALITY ====================
+
+            offlinePanelOpen = false;
+            swRegistration = null;
+            isDownloading = false;
+
+            async initServiceWorker() {
+                if ('serviceWorker' in navigator) {
+                    try {
+                        this.swRegistration = await navigator.serviceWorker.register('./sw.js');
+                        console.log('Service Worker registered');
+
+                        // Listen for messages from SW
+                        navigator.serviceWorker.addEventListener('message', (event) => {
+                            this.handleSwMessage(event.data);
+                        });
+
+                        // Check offline status on load
+                        this.updateOfflineStatus();
+                    } catch (error) {
+                        console.error('Service Worker registration failed:', error);
+                    }
+                }
+            }
+
+            handleSwMessage(data) {
+                switch (data.type) {
+                    case 'CACHE_PROGRESS':
+                        this.updateDownloadProgress(data.completed, data.total, data.url);
+                        break;
+                    case 'CACHE_COMPLETE':
+                        this.onDownloadComplete(data.total);
+                        break;
+                    case 'CACHE_SIZE':
+                        this.displayCacheSize(data.size);
+                        break;
+                    case 'CACHE_CLEARED':
+                        this.onCacheCleared();
+                        break;
+                    case 'VERSION':
+                        document.getElementById('offlineVersion').textContent = data.version;
+                        break;
+                }
+            }
+
+            toggleOfflinePanel() {
+                const panel = document.getElementById('offlinePanel');
+                this.offlinePanelOpen = !this.offlinePanelOpen;
+
+                if (this.offlinePanelOpen) {
+                    panel.style.display = 'block';
+                    this.updateOfflineStatus();
+                } else {
+                    panel.style.display = 'none';
+                }
+            }
+
+            async updateOfflineStatus() {
+                const statusIcon = document.getElementById('offlineStatusIcon');
+                const statusText = document.getElementById('offlineStatusText');
+                const badge = document.getElementById('offlineBadge');
+                const btn = document.getElementById('offlineBtn');
+                const downloadBtn = document.getElementById('offlineDownloadBtn');
+                const syncBtn = document.getElementById('offlineSyncBtn');
+                const clearBtn = document.getElementById('offlineClearBtn');
+
+                // Get version from SW
+                if (navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({ type: 'GET_VERSION' });
+                    navigator.serviceWorker.controller.postMessage({ type: 'GET_CACHE_SIZE' });
+                }
+
+                // Check if we have cached data
+                const lastSync = localStorage.getItem('vizsga_lastSync');
+                const offlineReady = localStorage.getItem('vizsga_offlineReady') === 'true';
+
+                if (offlineReady && lastSync) {
+                    // Already downloaded
+                    statusIcon.textContent = '✅';
+                    statusText.textContent = 'Offline mód elérhető';
+                    badge.className = 'offline-badge ready';
+                    btn.classList.add('ready');
+
+                    downloadBtn.textContent = '📥 Újratöltés';
+                    syncBtn.style.display = 'block';
+                    clearBtn.style.display = 'block';
+
+                    // Format last sync date
+                    const syncDate = new Date(parseInt(lastSync));
+                    document.getElementById('offlineLastSync').textContent = this.formatDate(syncDate);
+
+                    // Check for updates
+                    this.checkForUpdatesQuiet();
+                } else {
+                    // Not downloaded yet
+                    statusIcon.textContent = '📥';
+                    statusText.textContent = 'Nincs offline adat';
+                    badge.className = 'offline-badge';
+                    btn.classList.remove('ready');
+
+                    downloadBtn.textContent = '📥 Letöltés offline használathoz';
+                    syncBtn.style.display = 'none';
+                    clearBtn.style.display = 'none';
+
+                    document.getElementById('offlineLastSync').textContent = '-';
+                }
+            }
+
+            formatDate(date) {
+                const now = new Date();
+                const diff = now - date;
+                const minutes = Math.floor(diff / 60000);
+                const hours = Math.floor(diff / 3600000);
+                const days = Math.floor(diff / 86400000);
+
+                if (minutes < 1) return 'Most';
+                if (minutes < 60) return `${minutes} perce`;
+                if (hours < 24) return `${hours} órája`;
+                if (days < 7) return `${days} napja`;
+
+                return date.toLocaleDateString('hu-HU');
+            }
+
+            displayCacheSize(bytes) {
+                let size;
+                if (bytes < 1024) {
+                    size = bytes + ' B';
+                } else if (bytes < 1024 * 1024) {
+                    size = (bytes / 1024).toFixed(1) + ' KB';
+                } else if (bytes < 1024 * 1024 * 1024) {
+                    size = (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+                } else {
+                    size = (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+                }
+                document.getElementById('offlineCacheSize').textContent = size;
+            }
+
+            async startOfflineDownload() {
+                if (this.isDownloading) return;
+
+                const includeMedia = document.getElementById('offlineIncludeMedia').checked;
+                const downloadBtn = document.getElementById('offlineDownloadBtn');
+                const progressContainer = document.getElementById('offlineProgressContainer');
+                const statusIcon = document.getElementById('offlineStatusIcon');
+                const statusText = document.getElementById('offlineStatusText');
+
+                this.isDownloading = true;
+                downloadBtn.disabled = true;
+                downloadBtn.textContent = '⏳ Letöltés...';
+                progressContainer.style.display = 'block';
+                statusIcon.textContent = '⏳';
+                statusText.textContent = 'Letöltés folyamatban...';
+
+                // Build list of URLs to cache
+                let urlsToCache = [];
+
+                // Core app files
+                urlsToCache.push(
+                    './',
+                    './index.html',
+                    './index_EREDETI.html',
+                    './manifest.json'
+                );
+
+                // Embeddings if exists
+                urlsToCache.push('./embeddings.json');
+
+                // Media files for each chapter
+                const chapters = ['02', '03', '04', '05', '06', '07', '08'];
+
+                if (includeMedia) {
+                    for (const ch of chapters) {
+                        // Main media files
+                        urlsToCache.push(`./media/${ch}/teljes.md`);
+                        urlsToCache.push(`./media/${ch}/kivonat.md`);
+                        urlsToCache.push(`./media/${ch}/kivonat.pdf`);
+                        urlsToCache.push(`./media/${ch}/diasor.pdf`);
+                        urlsToCache.push(`./media/${ch}/podcast.m4a`);
+                        urlsToCache.push(`./media/${ch}/video.mp4`);
+                    }
+
+                    // Get list of images dynamically
+                    try {
+                        const imageList = await this.getMediaImageList();
+                        urlsToCache = urlsToCache.concat(imageList);
+                    } catch (e) {
+                        console.log('Could not get image list:', e);
+                    }
+                } else {
+                    // Just markdown files for basic offline
+                    for (const ch of chapters) {
+                        urlsToCache.push(`./media/${ch}/teljes.md`);
+                        urlsToCache.push(`./media/${ch}/kivonat.md`);
+                    }
+                }
+
+                // Send to service worker
+                if (navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({
+                        type: 'CACHE_URLS',
+                        urls: urlsToCache
+                    });
+                } else {
+                    // Fallback: direct caching
+                    await this.cacheUrlsDirect(urlsToCache);
+                }
+            }
+
+            async getMediaImageList() {
+                // This would ideally come from a manifest, for now we skip images
+                // in non-SW mode
+                return [];
+            }
+
+            async cacheUrlsDirect(urls) {
+                const cache = await caches.open('vizsga-media-v1.0.0');
+                let completed = 0;
+                const total = urls.length;
+
+                for (const url of urls) {
+                    try {
+                        const response = await fetch(url);
+                        if (response.ok) {
+                            await cache.put(url, response);
+                        }
+                    } catch (e) {
+                        // Skip failed URLs
+                    }
+                    completed++;
+                    this.updateDownloadProgress(completed, total, url);
+                }
+
+                this.onDownloadComplete(completed);
+            }
+
+            updateDownloadProgress(completed, total, url) {
+                const progressFill = document.getElementById('offlineProgressFill');
+                const progressText = document.getElementById('offlineProgressText');
+
+                const percent = Math.round((completed / total) * 100);
+                progressFill.style.width = percent + '%';
+
+                // Extract filename from URL
+                const filename = url.split('/').pop() || url;
+                progressText.textContent = `${percent}% - ${filename}`;
+            }
+
+            onDownloadComplete(total) {
+                this.isDownloading = false;
+
+                const downloadBtn = document.getElementById('offlineDownloadBtn');
+                const progressContainer = document.getElementById('offlineProgressContainer');
+
+                downloadBtn.disabled = false;
+                progressContainer.style.display = 'none';
+
+                // Save offline status
+                localStorage.setItem('vizsga_offlineReady', 'true');
+                localStorage.setItem('vizsga_lastSync', Date.now().toString());
+
+                // Update UI
+                this.updateOfflineStatus();
+
+                // Show success message
+                alert(`✅ Offline letöltés kész!\n${total} fájl mentve.`);
+            }
+
+            async checkForUpdates() {
+                const statusIcon = document.getElementById('offlineStatusIcon');
+                const statusText = document.getElementById('offlineStatusText');
+                const btn = document.getElementById('offlineBtn');
+
+                statusIcon.textContent = '🔄';
+                statusText.textContent = 'Frissítések keresése...';
+                btn.classList.add('syncing');
+
+                try {
+                    // Fetch the HTML with cache-busting
+                    const response = await fetch('./index_EREDETI.html?_=' + Date.now());
+                    const serverVersion = response.headers.get('last-modified') || Date.now();
+
+                    const localVersion = localStorage.getItem('vizsga_contentVersion');
+
+                    if (localVersion && localVersion !== serverVersion) {
+                        // Update available
+                        document.getElementById('offlineBadge').className = 'offline-badge update-available';
+                        statusIcon.textContent = '🔄';
+                        statusText.textContent = 'Frissítés elérhető!';
+                        alert('🔄 Új tartalom elérhető!\nKattints a "Letöltés" gombra a frissítéshez.');
+                    } else {
+                        statusIcon.textContent = '✅';
+                        statusText.textContent = 'Naprakész';
+                        localStorage.setItem('vizsga_contentVersion', serverVersion);
+                    }
+                } catch (error) {
+                    statusIcon.textContent = '⚠️';
+                    statusText.textContent = 'Nincs internet kapcsolat';
+                }
+
+                btn.classList.remove('syncing');
+            }
+
+            async checkForUpdatesQuiet() {
+                try {
+                    const response = await fetch('./index_EREDETI.html?_=' + Date.now(), { method: 'HEAD' });
+                    const serverVersion = response.headers.get('last-modified') || '';
+                    const localVersion = localStorage.getItem('vizsga_contentVersion') || '';
+
+                    if (localVersion && serverVersion && localVersion !== serverVersion) {
+                        document.getElementById('offlineBadge').className = 'offline-badge update-available';
+                    }
+                } catch (e) {
+                    // Silently fail - probably offline
+                }
+            }
+
+            async clearOfflineData() {
+                if (!confirm('Biztosan törlöd az offline adatokat?\nEz nem törli a tanulási előrehaladásodat.')) {
+                    return;
+                }
+
+                const statusIcon = document.getElementById('offlineStatusIcon');
+                const statusText = document.getElementById('offlineStatusText');
+
+                statusIcon.textContent = '🗑️';
+                statusText.textContent = 'Törlés...';
+
+                if (navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_CACHE' });
+                } else {
+                    // Direct cache clearing
+                    const cacheNames = await caches.keys();
+                    for (const name of cacheNames) {
+                        if (name.startsWith('vizsga-')) {
+                            await caches.delete(name);
+                        }
+                    }
+                    this.onCacheCleared();
+                }
+            }
+
+            onCacheCleared() {
+                localStorage.removeItem('vizsga_offlineReady');
+                localStorage.removeItem('vizsga_lastSync');
+                localStorage.removeItem('vizsga_contentVersion');
+
+                this.updateOfflineStatus();
+                document.getElementById('offlineCacheSize').textContent = '-';
+
+                alert('🗑️ Offline adatok törölve.');
+            }
+
+            // ==================== END OFFLINE FUNCTIONALITY ====================
+
             debounceGlobalSearch(query) {
                 clearTimeout(this.globalSearchTimeout);
 
@@ -4353,6 +5004,9 @@
 
         // Initialize
         const app = new LearningApp();
+
+        // Initialize Service Worker for offline functionality
+        app.initServiceWorker();
     </script>
 </body>
 </html>
