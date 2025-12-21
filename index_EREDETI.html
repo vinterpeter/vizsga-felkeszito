@@ -1123,6 +1123,13 @@
         .ai-result-type.flashcard {
             background: rgba(0,217,255,0.2);
             color: #00d9ff;
+            /* Override .flashcard card styles */
+            width: auto;
+            height: auto;
+            position: static;
+            transform-style: flat;
+            transition: none;
+            cursor: default;
         }
 
         .ai-result-type.quiz {
