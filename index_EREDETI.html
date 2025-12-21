@@ -36,17 +36,58 @@
         }
 
         header {
-            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             padding: 15px 0;
+            position: relative;
         }
 
         header h1 {
             font-size: 2rem;
-            margin-bottom: 5px;
+            margin-bottom: 0;
             background: linear-gradient(90deg, #00d9ff, #00ff88);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+
+        .header-search-btn {
+            position: absolute;
+            right: 0;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-search-btn:hover {
+            background: rgba(0,217,255,0.2);
+            border-color: #00d9ff;
+            transform: scale(1.1);
+        }
+
+        .global-search-close {
+            position: absolute;
+            right: 50px;
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px 10px;
+            transition: color 0.2s ease;
+        }
+
+        .global-search-close:hover {
+            color: #ff6b6b;
         }
 
         .subtitle {
@@ -1359,12 +1400,14 @@
     <div class="container">
         <header>
             <h1>Vizsgafelkészítő</h1>
+            <button class="header-search-btn" onclick="app.toggleGlobalSearch()" title="Keresés">🔍</button>
         </header>
 
-        <!-- Global Search -->
-        <div id="globalSearchContainer" class="global-search-container">
+        <!-- Global Search (hidden by default) -->
+        <div id="globalSearchContainer" class="global-search-container" style="display: none;">
             <div class="global-search-input-wrapper">
                 <input type="text" id="globalSearchInput" placeholder="Keresés az összes anyagban..." oninput="app.debounceGlobalSearch(this.value)">
+                <button class="global-search-close" onclick="app.toggleGlobalSearch()">&times;</button>
                 <span id="globalSearchSpinner" class="search-spinner" style="display:none;">⏳</span>
             </div>
             <div id="globalSearchResults" class="global-search-results"></div>
@@ -3367,6 +3410,22 @@
             globalSearchTimeout = null;
             cachedMdContent = {};
             lastGlobalQuery = '';
+
+            toggleGlobalSearch() {
+                const container = document.getElementById('globalSearchContainer');
+                const isVisible = container.style.display !== 'none';
+
+                if (isVisible) {
+                    container.style.display = 'none';
+                    // Clear search when closing
+                    document.getElementById('globalSearchInput').value = '';
+                    document.getElementById('globalSearchResults').innerHTML = '';
+                } else {
+                    container.style.display = 'block';
+                    // Focus on input when opening
+                    document.getElementById('globalSearchInput').focus();
+                }
+            }
 
             debounceGlobalSearch(query) {
                 clearTimeout(this.globalSearchTimeout);
