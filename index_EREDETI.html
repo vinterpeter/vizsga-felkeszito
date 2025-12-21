@@ -2286,7 +2286,7 @@
             <div class="offline-panel-content">
                 <div class="offline-panel-header">
                     <span class="offline-panel-title">📥 Offline mód</span>
-                    <span class="offline-version" id="offlineVersion">v1.2.0</span>
+                    <span class="offline-version" id="offlineVersion">v1.2.1</span>
                     <button class="offline-panel-close" onclick="app.toggleOfflinePanel()">&times;</button>
                 </div>
                 <div class="offline-status" id="offlineStatus">
@@ -4775,6 +4775,10 @@
                 if (navigator.serviceWorker.controller) {
                     navigator.serviceWorker.controller.postMessage({ type: 'GET_VERSION' });
                     navigator.serviceWorker.controller.postMessage({ type: 'GET_CACHE_SIZE' });
+                } else {
+                    // SW not ready yet, check status with default version
+                    this.currentSwVersion = '1.2.1';
+                    this.checkVersionStatus();
                 }
             }
 
@@ -4788,7 +4792,14 @@
                 const clearBtn = document.getElementById('offlineClearBtn');
 
                 const lastSync = localStorage.getItem('vizsga_lastSync');
-                const cachedVersion = localStorage.getItem('vizsga_cachedVersion');
+                let cachedVersion = localStorage.getItem('vizsga_cachedVersion');
+
+                // Migrate from old localStorage key
+                if (!cachedVersion && localStorage.getItem('vizsga_offlineReady') === 'true') {
+                    cachedVersion = '1.1.0'; // Assume old version
+                    localStorage.setItem('vizsga_cachedVersion', cachedVersion);
+                    localStorage.removeItem('vizsga_offlineReady');
+                }
 
                 if (!cachedVersion || !lastSync) {
                     // Not downloaded yet
@@ -4952,7 +4963,7 @@
             }
 
             async cacheUrlsDirect(urls) {
-                const version = this.currentSwVersion || '1.2.0';
+                const version = this.currentSwVersion || '1.2.1';
                 const cache = await caches.open(`vizsga-media-v${version}`);
                 let completed = 0;
                 const total = urls.length;
